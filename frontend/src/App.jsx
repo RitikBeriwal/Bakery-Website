@@ -9,7 +9,8 @@ import Register from "./components/auth/Register";
 import VerifyOTP from "./components/auth/VerifyOTP";
 import SetUsername from "./components/auth/SetUsername";
 import Login from "./components/auth/Login";
-import Profile from "./components/userProfile/Profile";
+// import Profile from "./components/userProfile/Profile";
+import Profile from "./components/userProfile/Profile"
 import EditProfile from "./components/userProfile/EditProfile";
 
 import ContactUs from "./components/ContactUs";
@@ -95,16 +96,14 @@ export default function App() {
         }
       />
 
-
       <Route
         path="/reset-password"
         element={
           <AuthLayout>
-            <ResetPassword/>
+            <ResetPassword />
           </AuthLayout>
         }
       />
-
 
       {/* User profile */}
       <Route
@@ -123,18 +122,28 @@ export default function App() {
           </AuthLayout>
         }
       />
-
-
-            <ResetPassword />
-          </AuthLayout>
-        }
-      />
       <Route
         path="/otp-verify"
         element={
           <AuthLayout>
             <VerifyForgetPasswordOTP />
           </AuthLayout>
+        }
+      />
+      <Route
+        path="/profile"
+        element={
+          <MainLayout>
+            <Profile />
+          </MainLayout>
+        }
+      />
+      <Route
+        path="/edit-profile"
+        element={
+          <MainLayout>
+            <EditProfile />
+          </MainLayout>
         }
       />
     </Routes>

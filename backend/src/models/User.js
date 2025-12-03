@@ -49,12 +49,12 @@ const userSchema = new mongoose.Schema(
 );
 
 // FIXED: Correct schema name + correct function syntax
-userSchema.pre("save", async function () {
-  if (!this.isModified("password")) return;
+// userSchema.pre("save", async function () {
+//   if (!this.isModified("password")) return;
 
-  const salt = await bcrypt.genSalt(10);
-  this.password = await bcrypt.hash(this.password, salt);
-});
+//   const salt = await bcrypt.genSalt(10);
+//   this.password = await bcrypt.hash(this.password, salt);
+// });
 
 // compare password helper
 userSchema.methods.comparePassword = async function (candidatePassword) {

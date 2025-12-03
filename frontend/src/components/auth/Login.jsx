@@ -42,7 +42,7 @@ const Login = () => {
 
       localStorage.setItem("userToken", response.data.token);
 
-      navigate("/userHomePage");
+      navigate("/home");
     } catch (err) {
       setMessage(err?.response?.data?.message || "Invalid email or password.");
     } finally {

@@ -82,200 +82,129 @@ router.put(
   }
 );
 
-// ----------------------------------------------------
-// WALLET BALANCE
-// ----------------------------------------------------
-router.get("/wallet", protect, async (req, res) => {
-  try {
-    const user = await User.findById(req.user.id).select("walletBalance");
-    res.json({
-      success: true,
-      balance: user.walletBalance || 0,
-    });
-  } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
-  }
-});
-
-// ----------------------------------------------------
-// PURCHASE HISTORY
-// ----------------------------------------------------
-router.get("/purchases", protect, async (req, res) => {
-  try {
-    const orders = await Order.find({ user: req.user.id }).sort({
-      createdAt: -1,
-    });
-    res.json({ success: true, purchases: orders });
-  } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
-  }
-});
-
-// ----------------------------------------------------
-// ADD MONEY TO WALLET
-// ----------------------------------------------------
-router.patch("/add-money", protect, async (req, res) => {
-  try {
-    const { amount } = req.body;
-
-    if (!amount || amount <= 0)
-      return res.status(400).json({ message: "Invalid amount" });
-
-    const user = await User.findById(req.user.id);
-    user.walletBalance += Number(amount);
-    await user.save();
-
-    res.json({
-      success: true,
-      message: "Wallet updated",
-      balance: user.walletBalance,
-    });
-  } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
-  }
-});
-
-
-// DELETE USER ACCOUNT
-
+/* ============================================================
+   DELETE ACCOUNT
+============================================================ */
 router.delete("/delete-account", protect, async (req, res) => {
   try {
-    const user = await User.findByIdAndDelete(req.user.id);
+    const deleted = await User.findByIdAndDelete(req.user.id);
 
-    if (!user) {
-      return res.status(404).json({ success: false, message: "User not found" });
-    }
+    if (!deleted)
+      return res
+        .status(404)
+        .json({ success: false, message: "User not found" });
 
     res.json({
       success: true,
-      message: "Account deleted successfully"
+      message: "Account deleted successfully",
     });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
 });
 
-
-// ADD ADDRESS
-
+/* ============================================================
+   ADD ADDRESS  (single address — matches your schema)
+============================================================ */
 router.post("/add-address", protect, async (req, res) => {
   try {
-    const { addressLine, city, state, pincode, country } = req.body;
+    const { street, city, state, pincode } = req.body;
 
-    if (!addressLine || !city || !state || !pincode)
+    if (!street || !city || !state || !pincode)
       return res.status(400).json({ message: "All address fields required" });
 
     const user = await User.findById(req.user.id);
 
-    const newAddress = {
-      addressLine,
-      city,
-      state,
-      pincode,
-      country: country || "India"
-    };
-
-    user.addresses = user.addresses || [];
-    user.addresses.push(newAddress);
-
+    user.address = { street, city, state, pincode };
     await user.save();
 
     res.json({
       success: true,
       message: "Address added successfully",
-      addresses: user.addresses
+      address: user.address,
     });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
 });
 
-
-// UPDATE ADDRESS
-
-router.put("/update-address/:addressId", protect, async (req, res) => {
+/* ============================================================
+   UPDATE ADDRESS (matches your schema)
+============================================================ */
+router.put("/update-address", protect, async (req, res) => {
   try {
-    const { addressId } = req.params;
-    const { addressLine, city, state, pincode, country } = req.body;
+    const { street, city, state, pincode } = req.body;
 
     const user = await User.findById(req.user.id);
 
-    const address = user.addresses.id(addressId);
-    if (!address) {
-      return res.status(404).json({ message: "Address not found" });
-    }
+    if (!user) return res.status(404).json({ message: "User not found" });
 
-    address.addressLine = addressLine || address.addressLine;
-    address.city = city || address.city;
-    address.state = state || address.state;
-    address.pincode = pincode || address.pincode;
-    address.country = country || address.country;
+    user.address.street = street || user.address.street;
+    user.address.city = city || user.address.city;
+    user.address.state = state || user.address.state;
+    user.address.pincode = pincode || user.address.pincode;
 
     await user.save();
 
     res.json({
       success: true,
       message: "Address updated successfully",
-      address
+      address: user.address,
     });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
 });
 
-
-// ADD PHONE NUMBER
-
+/* ============================================================
+   ADD PHONE NUMBER
+============================================================ */
 router.patch("/add-phone", protect, async (req, res) => {
   try {
     const { phone } = req.body;
 
-    if (!phone) {
+    if (!phone)
       return res.status(400).json({ message: "Phone number required" });
-    }
 
     const user = await User.findById(req.user.id);
+
     user.phone = phone;
     await user.save();
 
     res.json({
       success: true,
       message: "Phone number updated successfully",
-      phone: user.phone
+      phone: user.phone,
     });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
 });
 
-
-// REMOVE PROFILE PICTURE
-
+/* ============================================================
+   REMOVE PROFILE PICTURE
+============================================================ */
 router.delete("/remove-profile-pic", protect, async (req, res) => {
   try {
     const user = await User.findById(req.user.id);
 
-    if (!user.profilePic) {
+    if (!user.profilePicture)
       return res.status(400).json({ message: "No profile picture to remove" });
+
+    if (fs.existsSync(user.profilePicture)) {
+      fs.unlinkSync(user.profilePicture);
     }
 
-    // Delete from folder
-    if (fs.existsSync(user.profilePic)) {
-      fs.unlinkSync(user.profilePic);
-    }
-
-    // Remove from database
-    user.profilePic = null;
+    user.profilePicture = "";
     await user.save();
 
     res.json({
       success: true,
-      message: "Profile picture removed successfully"
+      message: "Profile picture removed successfully",
     });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
 });
-
 
 module.exports = router;

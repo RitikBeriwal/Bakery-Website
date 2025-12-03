@@ -1,17 +1,42 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Menu, X, ChevronDown } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import logo from "../assets/homePage/logo White.png";
 import { FaShoppingCart } from "react-icons/fa";
 
 const Navbar = () => {
   const [open, setOpen] = useState(false);
 
-  // authenticaction
-
-  const [isLoggedIn, setIsLoggedIn] = useState(true);
-
+  // === AUTH STATE ===
+  const [user, setUser] = useState(null);
   const [cartCount, setCartCount] = useState(0);
+
+  // Load user from localStorage
+  const location = useLocation();
+
+  useEffect(() => {
+    const stored = localStorage.getItem("userInfo");
+    if (stored) {
+      setUser(JSON.parse(stored));
+    } else {
+      setUser(null);
+    }
+
+    const handleStorageChange = () => {
+      const updated = localStorage.getItem("userInfo");
+      if (updated) {
+        setUser(JSON.parse(updated));
+      } else {
+        setUser(null);
+      }
+    };
+
+    window.addEventListener("storage", handleStorageChange);
+
+    return () => {
+      window.removeEventListener("storage", handleStorageChange);
+    };
+  }, [location]);
 
   const menuItems = [
     {
@@ -40,8 +65,8 @@ const Navbar = () => {
     <nav className="fixed top-4 left-1/2 -translate-x-1/2 w-[95%] lg:w-[85%] z-50">
       <div
         className="bg-[#6f482a]/95 backdrop-blur-xl shadow-[0_8px_30px_rgba(0,0,0,0.2)]
-                border border-white/20 rounded-full px-5 sm:px-8 md:px-10 py-3 
-                flex items-center justify-between transition-all"
+        border border-white/20 rounded-full px-5 sm:px-8 md:px-10 py-3 
+        flex items-center justify-between transition-all"
       >
         {/* Logo */}
         <Link to="/" className="flex items-center">
@@ -52,12 +77,11 @@ const Navbar = () => {
           />
         </Link>
 
-        {/* Desktop Menu */}
+        {/* ======= DESKTOP MENU ======= */}
         <ul className="hidden xl:flex items-center space-x-8 text-white font-semibold">
           {menuItems.map((item) =>
             item.dropdown ? (
               <li key={item.name} className="relative group cursor-pointer">
-                {/* Parent */}
                 <span className="flex items-center hover:text-[#d78f52] transition">
                   {item.name}
                   <ChevronDown
@@ -66,23 +90,21 @@ const Navbar = () => {
                   />
                 </span>
 
-                {/* HOVER AREA BUFFER (to prevent dropdown from closing fast) */}
                 <div className="absolute left-0 right-0 top-full h-4"></div>
 
-                {/* Dropdown */}
                 <div
                   className="absolute top-full left-1/2 -translate-x-1/2 w-48
-                                    bg-white/95 backdrop-blur-md shadow-xl rounded-xl py-2 mt-3
-                                    opacity-0 scale-95 pointer-events-none
-                                    group-hover:opacity-100 group-hover:scale-100 group-hover:pointer-events-auto
-                                    transition-all duration-300 ease-out"
+                  bg-white/95 backdrop-blur-md shadow-xl rounded-xl py-2 mt-3
+                  opacity-0 scale-95 pointer-events-none
+                  group-hover:opacity-100 group-hover:scale-100 group-hover:pointer-events-auto
+                  transition-all duration-300 ease-out"
                 >
                   {item.dropdown.map((d) => (
                     <Link
                       key={d.label}
                       to={d.path}
                       className="block px-4 py-2 text-sm text-[#8b5e3c]
-                                            hover:bg-[#f8e9dd] hover:text-[#c57b41] transition"
+                      hover:bg-[#f8e9dd] hover:text-[#c57b41] transition"
                     >
                       {d.label}
                     </Link>
@@ -102,30 +124,30 @@ const Navbar = () => {
           )}
         </ul>
 
-        {/* Desktop Buttons */}
+        {/* ======= DESKTOP BUTTONS ======= */}
         <div className="hidden xl:flex items-center gap-5">
           <Link to="/order">
             <button
               className="px-6 py-2 rounded-full bg-gradient-to-r from-[#dda56a] to-[#e8b381] 
-        text-white font-semibold shadow-lg hover:scale-105 transition"
+              text-white font-semibold shadow-lg hover:scale-105 transition"
             >
               Order Now
             </button>
           </Link>
 
-          {!isLoggedIn ? (
+          {user ? (
             <div className="flex items-center gap-5">
+              {/* CART */}
               <Link to="/cart">
                 <div className="relative">
                   <FaShoppingCart
                     size={26}
                     className="text-white hover:text-[#f3d2ae] transition"
                   />
-
                   {cartCount > 0 && (
                     <span
                       className="absolute -top-2 -right-2 bg-red-500 text-white text-xs 
-                        w-5 h-5 flex items-center justify-center rounded-full"
+                      w-5 h-5 flex items-center justify-center rounded-full"
                     >
                       {cartCount}
                     </span>
@@ -133,26 +155,28 @@ const Navbar = () => {
                 </div>
               </Link>
 
+              {/* PROFILE CIRCLE */}
               <Link to="/profile">
-                <img
-                  src="https://i.pinimg.com/736x/fc/af/7a/fcaf7aec4b7be05a0d062eff7851d2aa.jpg"
-                  className="w-10 h-10 rounded-full border-2 border-white hover:scale-110 transition"
-                  alt="profile"
-                />
-
-                {/* Example: Circle with First Alphabet
-                                <div className="w-10 h-10 bg-[#d78f52] text-white rounded-full 
-                                flex items-center justify-center text-lg font-bold 
-                                hover:scale-110 transition">
-                                    {username?.charAt(0).toUpperCase()}
-                                </div> */}
+                <div className="w-10 h-10 rounded-full overflow-hidden hover:scale-110 transition">
+                  {user?.profilePicture ? (
+                    <img
+                      src={user.profilePicture}
+                      alt="profile"
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-[#d78f52] text-white flex items-center justify-center text-lg font-bold">
+                      {user?.username?.charAt(0).toUpperCase()}
+                    </div>
+                  )}
+                </div>
               </Link>
             </div>
           ) : (
             <Link to="/login">
               <button
                 className="px-6 py-2 rounded-full bg-white 
-            text-[#8b5e3c] font-semibold shadow-lg hover:scale-105 transition"
+                text-[#8b5e3c] font-semibold shadow-lg hover:scale-105 transition"
               >
                 Login Now
               </button>
@@ -160,17 +184,16 @@ const Navbar = () => {
           )}
         </div>
 
-        {/* Mobile Menu Toggle */}
+        {/* Mobile Hamburger */}
         <button className="xl:hidden text-white" onClick={() => setOpen(!open)}>
           {open ? <X size={28} /> : <Menu size={28} />}
         </button>
       </div>
 
-      {/* Mobile / Tablet Dropdown */}
+      {/* ======= MOBILE MENU ======= */}
       <div
         className={`xl:hidden bg-white/90 backdrop-blur-xl mt-3 rounded-2xl shadow-xl overflow-hidden 
-                    transition-all duration-500 
-                    ${open ? "max-h-[600px] py-4" : "max-h-0"}`}
+        transition-all duration-500 ${open ? "max-h-[600px] py-4" : "max-h-0"}`}
       >
         <ul className="flex flex-col space-y-4 px-6 text-[#8b5e3c] font-semibold">
           {menuItems.map((item) =>
@@ -205,18 +228,18 @@ const Navbar = () => {
             )
           )}
 
+          {/* MOBILE AUTH */}
           <div className="flex flex-col-1 gap-5">
-            {/* Buttons */}
             <Link to="/order" onClick={() => setOpen(false)}>
               <button
                 className="w-42 px-6 py-2 rounded-full bg-gradient-to-r from-[#dda56a] to-[#e8b381] 
-                        text-white font-semibold shadow-lg hover:scale-105 transition"
+                text-white font-semibold shadow-lg hover:scale-105 transition"
               >
                 Order Now
               </button>
             </Link>
 
-            {isLoggedIn ? (
+            {!user ? (
               <Link to="/login" onClick={() => setOpen(false)}>
                 <button className="w-42 px-6 py-2 rounded-full bg-white text-[#8b5e3c] font-semibold shadow-lg hover:scale-105 transition border-1 border-[#6f482a]">
                   Login Now
@@ -224,18 +247,16 @@ const Navbar = () => {
               </Link>
             ) : (
               <div className="flex items-center gap-5 ml-auto">
-                {/* Cart Icon */}
                 <Link to="/cart">
                   <div className="relative">
                     <FaShoppingCart
                       size={26}
                       className="text-[#8b5e3c] hover:text-[#f3d2ae] transition"
                     />
-
                     {cartCount > 0 && (
                       <span
                         className="absolute -top-2 -right-2 bg-red-500 text-white text-xs 
-                        w-5 h-5 flex items-center justify-center rounded-full"
+                      w-5 h-5 flex items-center justify-center rounded-full"
                       >
                         {cartCount}
                       </span>
@@ -243,21 +264,21 @@ const Navbar = () => {
                   </div>
                 </Link>
 
-                {/* Profile (Username Initial or Image) */}
+                {/* MOBILE PROFILE */}
                 <Link to="/profile">
-                  {/* Example: Using Image */}
-                  <img
-                    src="https://i.pinimg.com/736x/fc/af/7a/fcaf7aec4b7be05a0d062eff7851d2aa.jpg"
-                    className="w-10 h-10 rounded-full border-2 border-white hover:scale-110 transition"
-                    alt="profile"
-                  />
-
-                  {/* Example: Circle with First Alphabet
-                                <div className="w-10 h-10 bg-[#d78f52] text-white rounded-full 
-                                flex items-center justify-center text-lg font-bold 
-                                hover:scale-110 transition">
-                                    {username?.charAt(0).toUpperCase()}
-                                </div> */}
+                  <div className="w-10 h-10 rounded-full overflow-hidden hover:scale-110 transition">
+                    {user?.profilePicture ? (
+                      <img
+                        src={user.profilePicture}
+                        alt="profile"
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-[#d78f52] text-white flex items-center justify-center text-lg font-bold">
+                        {user?.username?.charAt(0).toUpperCase()}
+                      </div>
+                    )}
+                  </div>
                 </Link>
               </div>
             )}
