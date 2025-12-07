@@ -13,7 +13,7 @@ const {
 const authMiddleware = require("../middlewares/authMiddleware");
 const adminMiddleware = require("../middlewares/adminMiddleware");
 
-// USER ROUTES 
+// USER ROUTES
 router.post("/create", authMiddleware, createOrder);
 router.post("/verify-payment", verifyPayment);
 router.get("/my", authMiddleware, getMyOrders);

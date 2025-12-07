@@ -2,11 +2,13 @@ const express = require("express");
 const Admin = require("../models/Admin");
 const User = require("../models/User");
 const Product = require("../models/Product");
+const uploadProductImages = require("../middlewares/uploadMiddleware");
 
 const adminAuth = require("../middlewares/adminMiddleware");
 const superAdminAuth = require("../middlewares/superAdminAuth"); // super admin access
 
 const router = express.Router();
+
 /* ============================================================
    FIRST SUPER ADMIN REGISTER (ONE-TIME ONLY)
 ============================================================ */
@@ -118,7 +120,7 @@ router.get("/admins", superAdminAuth, async (req, res) => {
 /* ============================================================
    SUPER ADMIN → Delete Admin
 ============================================================ */
-router.delete("/admins/:id", superAdminAuth, async (req, res) => {
+router.delete("/:id", superAdminAuth, async (req, res) => {
   try {
     const admin = await Admin.findByIdAndDelete(req.params.id);
     if (!admin) return res.status(404).json({ message: "Admin not found" });
@@ -154,43 +156,96 @@ router.patch("/admins/block/:id", superAdminAuth, async (req, res) => {
 /* ============================================================
    ADMIN + SUPER ADMIN → Add Product
 ============================================================ */
-router.post("/product", adminAuth, async (req, res) => {
-  try {
-    const { name, description, price, category, stock } = req.body;
+router.post(
+  "/product",
+  adminAuth,
+  uploadProductImages.array("images", 10), // accept up to 10 images
+  async (req, res) => {
+    try {
+      const { name, description, price, category, stock, isFeatured, tags } =
+        req.body;
 
-    if (!name || !price)
-      return res.status(400).json({ message: "Name and price required" });
+      if (!name || !price)
+        return res.status(400).json({ message: "Name and price required" });
 
-    const product = await Product.create({
-      name,
-      description,
-      price,
-      category,
-      stock,
-    });
+      const imagePaths = req.files.map(
+        (file) => `/uploads/products/${file.filename}`
+      );
 
-    res.status(201).json({
-      success: true,
-      message: "Product added successfully",
-      product,
-    });
-  } catch (err) {
-    res.status(500).json({ message: err.message });
+      const product = await Product.create({
+        name,
+        description,
+        price,
+        category,
+        stock,
+        isFeatured,
+        tags: tags ? tags.split(",").map((t) => t.trim()) : [],
+        images: imagePaths,
+      });
+
+      return res.status(201).json({
+        success: true,
+        message: "Product created successfully",
+        product,
+      });
+    } catch (err) {
+      console.log(err);
+      res.status(500).json({ message: err.message });
+    }
   }
-});
+);
 
 /* ============================================================
    ADMIN + SUPER ADMIN → Update Product
 ============================================================ */
 router.put("/product/:id", adminAuth, async (req, res) => {
   try {
-    const product = await Product.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
+    const { name, description, price, category, stock, isFeatured, tags } =
+      req.body;
+
+    const product = await Product.findById(req.params.id);
+    if (!product) return res.status(404).json({ message: "Product not found" });
+
+    // Update product fields
+    if (name !== undefined) product.name = name;
+    if (description !== undefined) product.description = description;
+    if (price !== undefined) product.price = price;
+    if (category !== undefined) product.category = category;
+    if (stock !== undefined) product.stock = stock;
+    if (isFeatured !== undefined) product.isFeatured = isFeatured;
+    if (tags !== undefined) {
+      product.tags =
+        typeof tags === "string"
+          ? tags
+              .split(",")
+              .map((t) => t.trim())
+              .filter((t) => t)
+          : tags;
+    }
+
+    await product.save();
+
+    res.json({
+      success: true,
+      message: "Product updated successfully",
+      product,
     });
+  } catch (err) {
+    console.error("Update error:", err);
+    res.status(500).json({ message: err.message });
+  }
+});
+
+/* ============================================================
+   ADMIN + SUPER ADMIN → Get Single Product
+============================================================ */
+router.get("/product/:id", adminAuth, async (req, res) => {
+  try {
+    const product = await Product.findById(req.params.id);
 
     if (!product) return res.status(404).json({ message: "Product not found" });
 
-    res.json({ success: true, message: "Product updated", product });
+    res.json({ success: true, product });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
@@ -202,13 +257,9 @@ router.put("/product/:id", adminAuth, async (req, res) => {
 router.delete("/product/:id", adminAuth, async (req, res) => {
   try {
     const product = await Product.findByIdAndDelete(req.params.id);
-
     if (!product) return res.status(404).json({ message: "Product not found" });
 
-    res.json({
-      success: true,
-      message: "Product deleted successfully",
-    });
+    res.json({ success: true, message: "Product deleted successfully" });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
@@ -257,17 +308,20 @@ router.delete("/user/:id", adminAuth, async (req, res) => {
 ============================================================ */
 router.patch("/user/block/:id", adminAuth, async (req, res) => {
   try {
-    const { blocked } = req.body;
+    const { blocked } = req.body; // expected true or false
 
     const user = await User.findById(req.params.id);
     if (!user) return res.status(404).json({ message: "User not found" });
 
-    user.isBlocked = blocked;
+    user.isBlocked = blocked; // update model field
     await user.save();
 
     res.json({
       success: true,
-      message: blocked ? "User blocked" : "User unblocked",
+      message: blocked
+        ? "User blocked successfully"
+        : "User unblocked successfully",
+      user,
     });
   } catch (err) {
     res.status(500).json({ message: err.message });

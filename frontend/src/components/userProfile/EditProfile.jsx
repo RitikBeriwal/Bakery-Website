@@ -1,10 +1,13 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 export default function EditProfile() {
   const [user, setUser] = useState(null);
   const [previewImg, setPreviewImg] = useState(null);
   const [loading, setLoading] = useState(true);
+
+  const navigate = useNavigate();
 
   const [form, setForm] = useState({
     name: "",
@@ -23,7 +26,6 @@ export default function EditProfile() {
 
   useEffect(() => {
     const token = localStorage.getItem("userToken");
-    // if (!token) return (window.location.href = "/login");
 
     axios
       .get("http://localhost:5000/api/auth/me", {
@@ -32,6 +34,7 @@ export default function EditProfile() {
       .then((res) => {
         const u = res.data;
         setUser(u);
+
         setForm({
           name: u?.name || "",
           username: u?.username || "",
@@ -56,6 +59,63 @@ export default function EditProfile() {
     if (file) setPreviewImg(URL.createObjectURL(file));
   };
 
+  // -----------------------------
+  // SAVE PROFILE FUNCTION
+  // -----------------------------
+  const handleUpdateProfile = async () => {
+    const token = localStorage.getItem("userToken");
+
+    try {
+      // Update basic profile info
+      await axios.put(
+        "http://localhost:5000/api/user/update-profile",
+        {
+          name: form.name,
+          username: form.username,
+        },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      // Update/Add phone
+      if (form.phone && form.phone !== user.phone) {
+        await axios.patch(
+          "http://localhost:5000/api/user/add-phone",
+          { phone: form.phone },
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+      }
+
+      const addressPayload = {
+        street: form.street,
+        city: form.city,
+        state: form.state,
+        pincode: form.pincode,
+      };
+
+      // Add or update address
+      if (!user.address) {
+        await axios.post(
+          "http://localhost:5000/api/user/add-address",
+          addressPayload,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+      } else {
+        await axios.put(
+          "http://localhost:5000/api/user/update-address",
+          addressPayload,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+      }
+
+      alert("Profile Updated Successfully!");
+      navigate("/profile");
+
+    } catch (err) {
+      console.error(err);
+      alert("Error updating profile");
+    }
+  };
+
   if (loading)
     return (
       <div className="h-screen flex justify-center items-center text-xl">
@@ -64,14 +124,13 @@ export default function EditProfile() {
     );
 
   return (
-    <div className="profile">
-      <div className="pt-30 max-w-4xl mx-auto p-6 py-10">
+    <div className="bg-[#f8f7f6]">
+      <div className="max-w-4xl mx-auto p-6 py-10">
         <div className="bg-white shadow-lg rounded-2xl p-8">
-          <h2 className="text-3xl font-bold mb-6 text-gray-900">
-            Edit Profile
-          </h2>
 
-          {/* Image */}
+          <h2 className="text-3xl font-bold mb-6 text-gray-900">Edit Profile</h2>
+
+          {/* Profile Image */}
           <div className="flex items-center gap-6 mb-8">
             <div className="relative w-28 h-28">
               <img
@@ -84,7 +143,7 @@ export default function EditProfile() {
                 alt="profile"
               />
 
-              <label className="absolute bottom-0 right-0 bg-yellow-600 text-white px-2 py-1 rounded cursor-pointer text-sm">
+              <label className="absolute bottom-0 right-0 bg-[#DFA26D] text-white px-2 py-1 rounded cursor-pointer text-sm">
                 Upload
                 <input
                   type="file"
@@ -108,9 +167,7 @@ export default function EditProfile() {
               { label: "Pincode", name: "pincode" },
             ].map((field, index) => (
               <div key={index}>
-                <label className="font-medium text-gray-700">
-                  {field.label}
-                </label>
+                <label className="font-medium text-gray-700">{field.label}</label>
                 <input
                   name={field.name}
                   value={form[field.name]}
@@ -121,34 +178,13 @@ export default function EditProfile() {
             ))}
           </div>
 
-          <button className="mt-8 w-full bg-yellow-600 text-white py-3 rounded-lg text-lg font-medium">
+          <button
+            onClick={handleUpdateProfile}
+            className="mt-8 w-full bg-[#DFA26D] text-white py-3 rounded-lg text-lg font-medium"
+          >
             Update Profile
           </button>
 
-          {/* Change Password */}
-          <h3 className="text-xl font-semibold mt-10 mb-4">Change Password</h3>
-
-          <div className="space-y-4">
-            <input
-              type="password"
-              name="oldPassword"
-              placeholder="Old Password"
-              onChange={handlePasswordChange}
-              className="w-full p-3 rounded-lg border"
-            />
-
-            <input
-              type="password"
-              name="newPassword"
-              placeholder="New Password"
-              onChange={handlePasswordChange}
-              className="w-full p-3 rounded-lg border"
-            />
-
-            <button className="w-full bg-gray-800 text-white py-3 rounded-lg">
-              Update Password
-            </button>
-          </div>
         </div>
       </div>
     </div>

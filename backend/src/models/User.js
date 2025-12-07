@@ -25,6 +25,7 @@ const userSchema = new mongoose.Schema(
     password: { type: String, required: true, select: false },
     profilePicture: { type: String, default: "" },
     role: { type: String, default: "user", enum: ["user", "admin"] },
+    isBlocked: { type: Boolean, default: false },
     emailVerified: { type: Boolean, default: false },
     wallet: { type: Number, default: 0 },
     cart: [
@@ -47,14 +48,6 @@ const userSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
-
-// FIXED: Correct schema name + correct function syntax
-userSchema.pre("save", async function () {
-  if (!this.isModified("password")) return;
-
-  const salt = await bcrypt.genSalt(10);
-  this.password = await bcrypt.hash(this.password, salt);
-});
 
 // compare password helper
 userSchema.methods.comparePassword = async function (candidatePassword) {

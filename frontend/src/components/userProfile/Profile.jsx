@@ -1,11 +1,14 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 export default function Profile() {
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [showDeletePopup, setShowDeletePopup] = useState(false);
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     const token = localStorage.getItem("userToken");
@@ -17,6 +20,22 @@ export default function Profile() {
       .then((res) => setUser(res.data.user))
       .finally(() => setLoading(false));
   }, []);
+
+  // DELETE ACCOUNT
+  const deleteAccount = async () => {
+    const token = localStorage.getItem("userToken");
+
+    try {
+      await axios.delete("http://localhost:5000/api/user/delete-account", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      localStorage.removeItem("userToken");
+      navigate("/login");
+    } catch (err) {
+      alert("Failed to delete account.", err);
+    }
+  };
 
   if (loading)
     return (
@@ -35,7 +54,7 @@ export default function Profile() {
   const hasProfilePic = Boolean(user?.profilePicture);
 
   return (
-    <div className="font-display bg-[#f8f7f6] min-h-screen text-[#181411] pt-30 px-4 py-10">
+    <div className="font-display bg-[#f8f7f6] min-h-screen text-[#181411] px-4 py-10">
       <div className="mx-auto w-full max-w-7xl">
         <div className="flex flex-col gap-8 md:flex-row">
           {/* =========================================
@@ -79,21 +98,31 @@ export default function Profile() {
                   </button>
 
                   <button className="flex items-center gap-3 rounded-lg px-3 py-2 hover:bg-orange-200/30">
-                    Settings
+                    Setting
                   </button>
-                  <button className="flex items-center gap-3 rounded-lg px-3 py-2 hover:bg-orange-200/30">
-                    Admin Login
-                  </button>
+                  <Link to={"/admin-login"}>
+                    <button className="flex items-center gap-3 rounded-lg px-3 py-2 hover:bg-orange-200/30">
+                      Admin Login
+                    </button>
+                  </Link>
                 </div>
               </div>
 
-              {/* LOGOUT */}
-              <button
-                onClick={() => setShowLogoutModal(true)}
-                className="flex items-center gap-3 rounded-lg px-3 py-2 hover:bg-orange-200/30"
-              >
-                Logout
-              </button>
+              {/* LOGOUT AND DELETE ACCOUNT*/}
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setShowLogoutModal(true)}
+                  className="w-full bg-[#FFEFDC] text-[#FF6900] py-2 rounded-lg font-medium hover:bg-[#fbe3c5]"
+                >
+                  Logout
+                </button>
+                <button
+                  onClick={() => setShowDeletePopup(true)}
+                  className="w-full bg-red-600 text-white py-2 px-2 rounded-lg font-medium hover:bg-red-700"
+                >
+                  Delete Account
+                </button>
+              </div>
             </div>
           </aside>
 
@@ -125,11 +154,50 @@ export default function Profile() {
 
               {/* PERSONAL INFO */}
               <h2 className="text-2xl font-bold mb-1">My Profile</h2>
-              <p className="text-gray-500 mb-6">{user?.name}</p>
+              <p className="text-gray-500 mb-6">
+                Your personal information is shown below.
+              </p>
 
-              {/* SAVE BUTTON */}
-              <div className="flex justify-end mt-4">
-                <Link to="/edit-profile">
+              {/* ⭐ Replaced Input Fields with Read-Only Display */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <div>
+                  <p className="text-sm text-gray-500 font-medium">Full Name</p>
+                  <p className="text-base font-semibold mt-1">{user?.name}</p>
+                </div>
+
+                <div>
+                  <p className="text-sm text-gray-500 font-medium">Email</p>
+                  <p className="text-base font-semibold mt-1">{user?.email}</p>
+                </div>
+
+                <div>
+                  <p className="text-sm text-gray-500 font-medium">
+                    Phone Number
+                  </p>
+                  <p className="text-base font-semibold mt-1">
+                    {user?.phone || "Not Added"}
+                  </p>
+                </div>
+
+                <div>
+                  <p className="text-sm text-gray-500 font-medium">
+                    Delivery Address
+                  </p>
+                  <p className="text-base font-semibold mt-1">
+                    {user?.address
+                      ? `${user.address.street || ""}, ${
+                          user.address.city || ""
+                        }, ${user.address.state || ""}, ${
+                          user.address.pincode || ""
+                        }`
+                      : "Not Added"}
+                  </p>
+                </div>
+              </div>
+
+              {/* EDIT PROFILE BUTTON */}
+              <div className="flex justify-end mt-6">
+                <Link to="/update-profile">
                   <button
                     className="px-6 py-2 rounded-lg text-white font-semibold bg-[#dfa26d] hover:bg-[#c98f5f] transition"
                     type="button"
@@ -169,8 +237,10 @@ export default function Profile() {
               </div>
             </div>
           </section>
+
+          {/* LOGOUT POPUP ANIMATION */}
           {showLogoutModal && (
-            <div className="fixed inset-0 bg-black/40 flex justify-center items-center z-50">
+            <div className="fixed inset-0 flex justify-center items-center bg-black/20 backdrop-blur-sm px-4 z-50 transition-all duration-300">
               <div className="bg-white p-6 rounded-xl shadow-xl w-80 animate-fadeIn">
                 <h2 className="text-xl font-semibold mb-2 text-[#181411]">
                   Logout
@@ -194,14 +264,10 @@ export default function Profile() {
                           "http://localhost:5000/api/auth/logout"
                         );
 
-                        // 🔑 Remove both
                         localStorage.removeItem("userToken");
                         localStorage.removeItem("userInfo");
-
-                        // 🔔 Let Navbar know immediately (same tab)
                         window.dispatchEvent(new Event("storage"));
 
-                        // Redirect
                         window.location.href = "/home";
                       } catch (error) {
                         console.error("Logout Error:", error);
@@ -210,6 +276,38 @@ export default function Profile() {
                     className="px-5 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition"
                   >
                     Logout
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* DELETE ACCOUNT POPUP ANIMATION */}
+          {showDeletePopup && (
+            <div className="fixed inset-0 flex justify-center items-center bg-black/20 backdrop-blur-sm px-4 z-50 transition-all duration-300">
+              <div className="bg-white w-full max-w-md p-6 rounded-2xl shadow-2xl animate-[fadeIn_0.2s_ease-out]">
+                <h2 className="text-xl font-semibold mb-2 text-[#181411]">
+                  Delete Account?
+                </h2>
+
+                <p className="text-gray-600 mb-6">
+                  Are you sure you want to permanently delete your account? This
+                  action cannot be undone.
+                </p>
+
+                <div className="flex justify-end gap-3">
+                  <button
+                    onClick={() => setShowDeletePopup(false)}
+                    className="px-5 py-2 bg-gray-200 rounded-lg hover:bg-gray-300 transition"
+                  >
+                    Cancel
+                  </button>
+
+                  <button
+                    onClick={deleteAccount}
+                    className="px-5 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700 transition"
+                  >
+                    Confirm Delete
                   </button>
                 </div>
               </div>

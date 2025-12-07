@@ -33,7 +33,12 @@ const Register = () => {
     e.preventDefault();
 
     // Basic Validation
-    if (!formData.name || !formData.email || !formData.phone || !formData.password) {
+    if (
+      !formData.name ||
+      !formData.email ||
+      !formData.phone ||
+      !formData.password
+    ) {
       toast.error("All fields are required");
       return;
     }
@@ -46,7 +51,7 @@ const Register = () => {
     setLoading(true);
 
     try {
-      const res = await axios.post(
+      const response = await axios.post(
         "http://localhost:5000/api/auth/register",
         formData
       );

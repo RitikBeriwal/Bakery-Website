@@ -37,6 +37,7 @@ const ImageCard = ({ src, label, tall }) => {
           translate-y-full 
           group-hover:translate-y-0 
           transition-all duration-500
+          labelText
         "
       >
         {label}
