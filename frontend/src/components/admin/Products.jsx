@@ -68,7 +68,7 @@ const Products = () => {
   };
 
   return (
-    <div className="p-6">
+    <div className="p-6 lg:ml-64">
       <Toaster position="top-right" />
       <h2 className="text-2xl font-bold mb-4">Products</h2>
 

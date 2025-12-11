@@ -143,6 +143,17 @@ const CustomCakeBuilder = () => {
     { _id: "caramel", name: "Caramel Drizzle", price: 40 },
   ];
 
+  // Helper to choose shape class (keeps theme same)
+  const getShapeClass = (shapeName) => {
+    if (!shapeName) return "rounded-full";
+    const s = shapeName.toLowerCase();
+    if (s.includes("round")) return "rounded-full";
+    if (s.includes("square")) return "rounded-xl";
+    if (s.includes("rectangle") || s.includes("tier")) return "rounded-lg";
+    if (s.includes("heart")) return "clip-heart";
+    return "rounded-full";
+  };
+
   // -------- Fetch helpers ----------
   const fetchCategory = async (category, setter, staticData) => {
     try {
@@ -235,6 +246,7 @@ const CustomCakeBuilder = () => {
     };
 
     loadAll();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // --------- Price Calculation ----------
@@ -445,6 +457,23 @@ const CustomCakeBuilder = () => {
   // Show price breakdown in debug mode
   const showPriceBreakdown = false;
 
+  // Choose preview shape name: prefer selectedShape, otherwise base cake's name
+  const previewShapeName =
+    selectedShape?.name || selectedBaseCake?.name || "Round";
+
+  // preview sizing based on shape
+  const previewStyleSize = () => {
+    const s = previewShapeName.toLowerCase();
+    if (s.includes("rectangle") || s.includes("tier")) {
+      return { width: 160, height: 90 };
+    }
+    if (s.includes("heart")) {
+      return { width: 140, height: 140 };
+    }
+    // default round/square
+    return { width: 130, height: 130 };
+  };
+
   return (
     <div className="font-sans bg-gradient-to-b from-amber-50 to-white min-h-screen ">
       <main className="flex-1 px-4 sm:px-6 lg:px-8 py-8 max-w-7xl mx-auto ">
@@ -479,6 +508,13 @@ const CustomCakeBuilder = () => {
                 {(baseCakes.length ? baseCakes : staticBaseCakes).map(
                   (cake) => {
                     const isActive = selectedBaseCake?.id === cake.id;
+                    // small shape class for left card
+                    const leftShapeClass = getShapeClass(cake.name);
+                    const leftWidth =
+                      cake.name.toLowerCase().includes("rectangle") ||
+                      cake.name.toLowerCase().includes("tier")
+                        ? "w-20 h-12"
+                        : "w-20 h-20";
                     return (
                       <button
                         key={cake.id}
@@ -493,13 +529,15 @@ const CustomCakeBuilder = () => {
                               (prev.totalPrice - prev.basePrice),
                           }));
                         }}
-                        className={`flex flex-col items-center p-4 rounded-xl border-2 transition-all duration-300 ${
+                        className={`flex flex-col items-center p-4 rounded-xl border-2 transition-all duration-300${
                           isActive
                             ? "border-amber-500 bg-amber-50 shadow-md"
                             : "border-amber-200 hover:border-amber-300 hover:bg-amber-50"
                         }`}
                       >
-                        <div className="w-20 h-20 rounded-full bg-gradient-to-br from-amber-400 to-rose-400 mb-3 flex items-center justify-center">
+                        <div
+                          className={`${leftWidth} ${leftShapeClass} bg-gradient-to-br from-amber-400 to-rose-400 mb-3 flex items-center justify-center `}
+                        >
                           <span className="text-white font-bold text-sm">
                             CAKE
                           </span>
@@ -771,9 +809,16 @@ const CustomCakeBuilder = () => {
                 {/* Cake Preview */}
                 <div className="mb-6 p-4 bg-gradient-to-br from-amber-100 to-rose-50 rounded-xl border border-amber-200">
                   <div className="flex items-center justify-center mb-4">
+                    {/* dynamic shaped preview */}
                     <div
-                      className="w-32 h-32 rounded-full flex items-center justify-center border-4 border-amber-300"
-                      style={{ backgroundColor: selectedColor }}
+                      className={`${getShapeClass(
+                        previewShapeName
+                      )} flex items-center justify-center border-4 border-amber-300`}
+                      style={{
+                        width: previewStyleSize().width + "px",
+                        height: previewStyleSize().height + "px",
+                        backgroundColor: selectedColor,
+                      }}
                     >
                       <span className="text-amber-800 font-bold">CAKE</span>
                     </div>
@@ -937,6 +982,18 @@ const CustomCakeBuilder = () => {
       <style jsx>{`
         .material-symbols-outlined {
           font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24;
+        }
+
+        /* Heart shape clip */
+        .clip-heart {
+          clip-path: polygon(
+            50% 80%,
+            0% 35%,
+            25% 0%,
+            50% 25%,
+            75% 0%,
+            100% 35%
+          );
         }
       `}</style>
     </div>
