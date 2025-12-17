@@ -1,6 +1,6 @@
 // src/components/admin/AdminLogin.jsx
 import React, { useState } from "react";
-import axios from "axios";
+import api from "../api/axios";
 import { useNavigate } from "react-router-dom";
 import "boxicons/css/boxicons.min.css";
 
@@ -23,7 +23,7 @@ const AdminLogin = () => {
     setLoading(true);
 
     try {
-      const response = await axios.post(
+      const response = await api.post(
         "http://localhost:5000/api/admin/login",
         {
           email: form.email,

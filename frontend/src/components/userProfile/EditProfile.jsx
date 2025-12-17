@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
+import api from "../api/axios";
 import { useNavigate } from "react-router-dom";
 
 export default function EditProfile() {
@@ -27,7 +27,7 @@ export default function EditProfile() {
   useEffect(() => {
     const token = localStorage.getItem("userToken");
 
-    axios
+    api
       .get("http://localhost:5000/api/auth/me", {
         headers: { Authorization: `Bearer ${token}` },
       })
@@ -67,7 +67,7 @@ export default function EditProfile() {
 
     try {
       // Update basic profile info
-      await axios.put(
+      await api.put(
         `http://localhost:5000/api/user/update-profile/${user._id}`,
         {
           name: form.name,
@@ -78,7 +78,7 @@ export default function EditProfile() {
 
       // Update/Add phone
       if (form.phone && form.phone !== user.phone) {
-        await axios.patch(
+        await api.patch(
           "http://localhost:5000/api/user/add-phone",
           { phone: form.phone },
           { headers: { Authorization: `Bearer ${token}` } }
@@ -94,13 +94,13 @@ export default function EditProfile() {
 
       // Add or update address
       if (!user.address) {
-        await axios.post(
+        await api.post(
           "http://localhost:5000/api/user/add-address",
           addressPayload,
           { headers: { Authorization: `Bearer ${token}` } }
         );
       } else {
-        await axios.put(
+        await api.put(
           "http://localhost:5000/api/user/update-address",
           addressPayload,
           { headers: { Authorization: `Bearer ${token}` } }

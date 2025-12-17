@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
+import api from "../api/axios";
 
 const AllUsers = () => {
   const [users, setUsers] = useState([]);
@@ -14,7 +14,7 @@ const AllUsers = () => {
   // Fetch all users
   const fetchUsers = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/api/admin/users", {
+      const res = await api.get("http://localhost:5000/api/admin/users", {
         headers: { Authorization: `Bearer ${token}` },
       });
 
@@ -43,7 +43,7 @@ const AllUsers = () => {
 
     try {
       if (modalAction === "delete") {
-        await axios.delete(
+        await api.delete(
           `http://localhost:5000/api/admin/user/${selectedUser._id}`,
           { headers: { Authorization: `Bearer ${token}` } }
         );
@@ -52,7 +52,7 @@ const AllUsers = () => {
       } else if (modalAction === "block" || modalAction === "unblock") {
         const shouldBlock = modalAction === "block";
 
-        await axios.patch(
+        await api.patch(
           `http://localhost:5000/api/admin/user/block/${selectedUser._id}`,
           { blocked: shouldBlock },
           { headers: { Authorization: `Bearer ${token}` } }

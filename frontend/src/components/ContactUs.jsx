@@ -18,7 +18,7 @@ function ContactUs() {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (!form.name || !form.email || !form.message) {
@@ -26,10 +26,28 @@ function ContactUs() {
       return;
     }
 
-    setError("");
-    setSuccess("Message sent successfully! ");
+    try {
+      const res = await fetch("http://localhost:5000/api/contact/contact-us", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(form),
+      });
 
-    setForm({ name: "", email: "", message: "" });
+      const data = await res.json();
+
+      if (!data.success) {
+        throw new Error(data.message);
+      }
+
+      setSuccess("Message sent successfully!");
+      setError("");
+      setForm({ name: "", email: "", message: "" });
+    } catch (err) {
+      setError("Failed to send message. Try again later.");
+      setSuccess("");
+    }
   };
 
   return (
@@ -84,7 +102,7 @@ function ContactUs() {
 
             <button
               type="submit"
-              className="w-full bg-[#dfa26d] text-white py-3 rounded-lg font-semibold hover:bg-[#e98d3d] transition"
+              className="w-full bg-[#dfa26d] cursor-pointer text-white py-3 rounded-lg font-semibold hover:bg-[#e98d3d] transition"
             >
               Send Message
             </button>
@@ -93,17 +111,37 @@ function ContactUs() {
           <div className="mt-6 space-y-2  ">
             <p className="font-semibold  text-center">Connect With Us:</p>
 
-            <div className="flex gap-4  justify-center">
+            <div className="flex gap-6 justify-center text-2xl">
+              {/* WhatsApp */}
               <a
-                href="#"
-                className="text-green-600 font-medium hover:underline"
+                href="https://api.whatsapp.com/send/?phone=7378021327&text=Hi%21+I+want+to+place+an+order.+Can+you+help+me+with+the+details%3F&type=phone_number&app_absent=0"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-green-600 hover:scale-110 transition-transform"
+                aria-label="Chat on WhatsApp"
               >
                 <FaWhatsapp />
               </a>
-              <a href="#" className="text-blue-600 font-medium hover:underline">
+
+              {/* Facebook */}
+              <a
+                href="https://www.facebook.com/Graphura.in"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-600 hover:scale-110 transition-transform"
+                aria-label="Visit Facebook page"
+              >
                 <FaFacebook />
               </a>
-              <a href="#" className="text-pink-600 font-medium hover:underline">
+
+              {/* Instagram */}
+              <a
+                href="https://www.instagram.com/graphura.in"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-pink-600 hover:scale-110 transition-transform"
+                aria-label="Visit Instagram profile"
+              >
                 <FaInstagram />
               </a>
             </div>

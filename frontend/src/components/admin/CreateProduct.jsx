@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
+import api from "../api/axios";
 
 export default function CreateProductModal({ onClose, onSave }) {
   const [form, setForm] = useState({
@@ -81,7 +81,7 @@ export default function CreateProductModal({ onClose, onSave }) {
   useEffect(() => {
     const fetchOptions = async () => {
       try {
-        const res = await axios.get("http://localhost:5000/api/product");
+        const res = await api.get("http://localhost:5000/api/product");
 
         if (res.data?.success) {
           const products = res.data.products;
@@ -220,7 +220,7 @@ export default function CreateProductModal({ onClose, onSave }) {
       });
 
       // IMPORTANT: Use admin route for product creation
-      const res = await axios.post(
+      const res = await api.post(
         "http://localhost:5000/api/admin/product", // Changed to admin route
         formData,
         {

@@ -21,7 +21,7 @@ const SideBar = ({ closeSidebar }) => {
     { name: "Dashboard", icon: <Home size={22} />, path: "/admin/dashboard" },
     { name: "Orders", icon: <ShoppingBag size={22} />, path: "/admin/orders" },
     { name: "Products", icon: <Boxes size={22} />, path: "/admin/products" },
-    { name: "Delivery", icon: <Truck size={22} />, path: "/admin/delivery" },
+    // { name: "Delivery", icon: <Truck size={22} />, path: "/admin/delivery" },
     { name: "Offers", icon: <Percent size={22} />, path: "/admin/offers" },
     {
       name: "Create Admin",

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
-import axios from "axios";
+import api from "../api/axios";
 import { toast } from "react-hot-toast"; // Add this import
 
 const Login = () => {
@@ -63,7 +63,7 @@ const Login = () => {
 
       if (isAdminLogin) {
         // Admin login
-        response = await axios.post("http://localhost:5000/api/admin/login", {
+        response = await api.post("http://localhost:5000/api/admin/login", {
           email: form.email,
           password: form.password,
         });
@@ -87,7 +87,7 @@ const Login = () => {
         navigate("/admin/dashboard");
       } else {
         // User login
-        response = await axios.post("http://localhost:5000/api/auth/login", {
+        response = await api.post("http://localhost:5000/api/auth/login", {
           email: form.email,
           password: form.password,
         });

@@ -1,4 +1,4 @@
-import axios from "axios";
+import api from "../api/axios";
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-hot-toast";
@@ -105,7 +105,7 @@ const VerifyOTP = () => {
 
       console.log("🔄 Verifying OTP for:", userDetails.email);
 
-      const res = await axios.post(
+      const res = await api.post(
         `http://localhost:5000/api/auth/verify-otp`,
         payload
       );
@@ -147,7 +147,7 @@ const VerifyOTP = () => {
     if (!canResend) return;
 
     try {
-      await axios.post(`http://localhost:5000/api/auth/send-otp`, {
+      await api.post(`http://localhost:5000/api/auth/send-otp`, {
         email: userDetails.email || undefined,
         phone: userDetails.phone || undefined,
       });

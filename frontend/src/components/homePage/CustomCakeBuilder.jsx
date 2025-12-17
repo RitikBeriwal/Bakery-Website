@@ -1,6 +1,6 @@
 // frontend/src/pages/CustomCakeBuilder.jsx
 import React, { useEffect, useState, useMemo } from "react";
-import axios from "axios";
+import api from "../api/axios";
 import { toast } from "react-hot-toast";
 import { useDispatch } from "react-redux";
 import { addToCart } from "../redux/Slice";
@@ -157,7 +157,7 @@ const CustomCakeBuilder = () => {
   // -------- Fetch helpers ----------
   const fetchCategory = async (category, setter, staticData) => {
     try {
-      const res = await axios.get(
+      const res = await api.get(
         `http://localhost:5000/api/customizations/${category.toLowerCase()}`
       );
       if (res.data?.success && res.data.data.length > 0) {
@@ -188,7 +188,7 @@ const CustomCakeBuilder = () => {
 
         // Try to fetch base cakes from API
         try {
-          const baseRes = await axios.get(
+          const baseRes = await api.get(
             "http://localhost:5000/api/customizations/base-cakes"
           );
           if (baseRes.data?.success && baseRes.data.data.length > 0) {

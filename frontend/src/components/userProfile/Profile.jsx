@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
+import api from "../api/axios";
 import { Link, useNavigate } from "react-router-dom";
 import {
   FaShoppingBag,
@@ -226,7 +226,7 @@ export default function Profile() {
   useEffect(() => {
     const token = localStorage.getItem("userToken");
 
-    axios
+    api
       .get("http://localhost:5000/api/auth/me", {
         headers: { Authorization: `Bearer ${token}` },
       })
@@ -253,13 +253,13 @@ export default function Profile() {
         );
 
         // First, let's check if the user exists
-        const userRes = await axios.get("http://localhost:5000/api/auth/me", {
+        const userRes = await api.get("http://localhost:5000/api/auth/me", {
           headers: { Authorization: `Bearer ${token}` },
         });
         console.log("📦 User ID from /api/auth/me:", userRes.data.user?._id);
 
         // Now fetch orders
-        const response = await axios.get(
+        const response = await api.get(
           "http://localhost:5000/api/orders/my",
           {
             headers: { Authorization: `Bearer ${token}` },
@@ -294,11 +294,12 @@ export default function Profile() {
     const token = localStorage.getItem("userToken");
 
     try {
-      await axios.delete("http://localhost:5000/api/user/delete-account", {
+      await api.delete("http://localhost:5000/api/user/delete-account", {
         headers: { Authorization: `Bearer ${token}` },
       });
 
       localStorage.removeItem("userToken");
+      localStorage.removeItem("userInfo");
       navigate("/login");
     } catch (err) {
       alert("Failed to delete account.", err);
@@ -376,7 +377,7 @@ export default function Profile() {
     }
 
     try {
-      const response = await axios.put(
+      const response = await api.put(
         `http://localhost:5000/api/orders/cancel/${orderId}`,
         {},
         {
@@ -619,7 +620,7 @@ export default function Profile() {
                   onClick={async () => {
                     const token = localStorage.getItem("userToken");
                     try {
-                      const response = await axios.get(
+                      const response = await api.get(
                         "http://localhost:5000/api/orders/my",
                         {
                           headers: { Authorization: `Bearer ${token}` },
@@ -885,7 +886,7 @@ export default function Profile() {
                   <button
                     onClick={async () => {
                       try {
-                        await axios.post(
+                        await api.post(
                           "http://localhost:5000/api/auth/logout"
                         );
 

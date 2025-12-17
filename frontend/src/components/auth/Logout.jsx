@@ -1,12 +1,12 @@
 import React, { useState } from "react";
-import axios from "axios";
+import api from "../api/axios";
 
 export default function LogoutButton() {
   const [message, setMessage] = useState("");
 
   const handleLogout = async () => {
     try {
-      await axios.post("http://localhost:5000/api/auth/logout");
+      await api.post("http://localhost:5000/api/auth/logout");
 
       // Remove everything
       localStorage.removeItem("userToken");

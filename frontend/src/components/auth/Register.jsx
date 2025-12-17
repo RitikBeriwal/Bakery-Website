@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import axios from "axios";
+import api from "../api/axios";
 import { useNavigate, NavLink } from "react-router-dom";
 import "boxicons/css/boxicons.min.css";
 import { toast } from "react-hot-toast";
@@ -51,7 +51,7 @@ const Register = () => {
     setLoading(true);
 
     try {
-      const response = await axios.post(
+      const response = await api.post(
         "http://localhost:5000/api/auth/register",
         formData
       );

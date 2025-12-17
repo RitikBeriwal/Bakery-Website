@@ -13,10 +13,10 @@ import { FaXTwitter } from "react-icons/fa6";
 import logo from "../assets/homePage/logo White.png";
 
 const Footer = () => {
-  const serviceLinks = [
+  const services = [
     { label: "Birthday Cakes", category: "Birthday Cakes" },
     { label: "Wedding Cakes", category: "Wedding Cakes" },
-    { label: "Custom Cakes", category: "Custom Cakes" },
+    // { label: "Custom Cakes", category: "Custom Cakes" },
     { label: "Pastries", category: "Pastries" },
     { label: "Rolls", category: "Rolls" },
     { label: "Premium Cakes", category: "Premium Cakes" },
@@ -75,21 +75,23 @@ const Footer = () => {
           </ul>
         </div>
 
-        {/* ================= SERVICES (MENU CATEGORIES) ================= */}
+        {/* ================= WHAT WE OFFER ================= */}
+        {/* ================= SERVICES ================= */}
         <div>
           <h3 className="text-xl font-semibold text-[#F9FBFB] mb-4 after:block after:w-14 after:h-[3px] after:bg-[#d78f52] after:mt-1">
             Services
           </h3>
 
-          <ul className="space-y-3 text-[#F9FBFB]">
-            {serviceLinks.map((item) => (
-              <li key={item.category}>
+          <ul className="space-y-3 text-[#F9FBFB] text-md">
+            {services.map((service) => (
+              <li key={service.category}>
                 <Link
                   to="/menu"
-                  state={{ fromFooter: true, category: item.category }}
+                  state={{ category: service.category, fromFooter: true }}
                   className="flex items-center gap-2 hover:text-[#d78f52] transition"
                 >
-                  <FaArrowRight size={12} /> {item.label}
+                  <FaArrowRight size={12} />
+                  {service.label}
                 </Link>
               </li>
             ))}

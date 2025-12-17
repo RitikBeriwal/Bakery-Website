@@ -89,7 +89,7 @@ export default function App() {
 
       {/* Wrap Routes with ErrorBoundary for global error handling */}
 
-      <ScrollToTop />
+        <ScrollToTop />
       <Routes>
         {/* ====================== DEFAULT ====================== */}
         <Route path="/" element={<Navigate to="/home" />} />

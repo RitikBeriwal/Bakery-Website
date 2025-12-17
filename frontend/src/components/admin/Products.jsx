@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
+import api from "../api/axios";
 import CreateProductModal from "./CreateProduct";
 import UpdateProductModal from "./UpdateProduct";
 import toast, { Toaster } from "react-hot-toast";
@@ -21,7 +21,7 @@ const Products = () => {
 
       const token = localStorage.getItem("adminToken");
 
-      const res = await axios.get("http://localhost:5000/api/admin/products", {
+      const res = await api.get("http://localhost:5000/api/admin/products", {
         headers: { Authorization: `Bearer ${token}` },
       });
 
@@ -49,7 +49,7 @@ const Products = () => {
     try {
       const token = localStorage.getItem("adminToken");
 
-      await axios.delete(
+      await api.delete(
         `http://localhost:5000/api/admin/product/${deleteProductId}`,
         {
           headers: { Authorization: `Bearer ${token}` },

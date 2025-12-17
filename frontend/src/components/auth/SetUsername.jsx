@@ -1,4 +1,4 @@
-import axios from "axios";
+import api from "../api/axios";
 import React, { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { toast } from "react-hot-toast";
@@ -51,7 +51,7 @@ const SetUsername = () => {
 
       console.log("🔄 Setting username for:", userInfo.email);
 
-      const res = await axios.post(
+      const res = await api.post(
         `http://localhost:5000/api/auth/set-username`,
         payload
       );

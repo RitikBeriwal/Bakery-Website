@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
+import api from "../api/axios";
 import { useParams } from "react-router-dom";
 import { FaCartPlus } from "react-icons/fa";
 
@@ -11,7 +11,7 @@ export default function ProductDetails() {
   useEffect(() => {
     const fetchProduct = async () => {
       try {
-        const res = await axios.get(`http://localhost:5000/api/product/${id}`);
+        const res = await api.get(`http://localhost:5000/api/product/${id}`);
 
         setProduct(res.data.product);
       } catch (error) {

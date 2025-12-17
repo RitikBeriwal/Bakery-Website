@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
+import api from "../api/axios";
 import toast from "react-hot-toast";
 
 export default function UpdateProductModal({ productId, onClose }) {
@@ -30,10 +30,10 @@ export default function UpdateProductModal({ productId, onClose }) {
     const fetchProductAndOptions = async () => {
       try {
         const [productRes, allProductsRes] = await Promise.all([
-          axios.get(`http://localhost:5000/api/product/single/${productId}`, {
+          api.get(`http://localhost:5000/api/product/single/${productId}`, {
             headers: { Authorization: `Bearer ${token}` },
           }),
-          axios.get(`http://localhost:5000/api/product`),
+          api.get(`http://localhost:5000/api/product`),
         ]);
 
         // Load product data with fallbacks for undefined values
@@ -129,7 +129,7 @@ export default function UpdateProductModal({ productId, onClose }) {
       console.log("📤 Tags being sent:", updateData.tags);
       console.log("📤 Tags type:", typeof updateData.tags);
 
-      const response = await axios.put(
+      const response = await api.put(
         `http://localhost:5000/api/product/update/${productId}`,
         updateData,
         {

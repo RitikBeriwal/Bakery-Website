@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
+import api from "../api/axios";
 import { toast } from "react-hot-toast";
 import {
   FaEye,
@@ -77,7 +77,7 @@ const Orders = () => {
       setLoading(true);
       const token = localStorage.getItem("adminToken");
 
-      const response = await axios.get(
+      const response = await api.get(
         "http://localhost:5000/api/admin/orders",
         {
           headers: { Authorization: `Bearer ${token}` },
@@ -142,7 +142,7 @@ const Orders = () => {
     try {
       const token = localStorage.getItem("adminToken");
 
-      const response = await axios.put(
+      const response = await api.put(
         `http://localhost:5000/api/admin/orders/${orderId}/status`,
         { status: newStatus },
         {
@@ -175,7 +175,7 @@ const Orders = () => {
     try {
       const token = localStorage.getItem("adminToken");
 
-      const response = await axios.delete(
+      const response = await api.delete(
         `http://localhost:5000/api/admin/orders/${orderId}`,
         {
           headers: { Authorization: `Bearer ${token}` },

@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { selectCart } from "../redux/Slice";
 import { toast } from "react-hot-toast";
-import axios from "axios";
+// import api from "../api/axios";
 
 const OrderSuccess = () => {
   const navigate = useNavigate();

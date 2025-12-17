@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
+import api from "../api/axios";
 // import { useCallback } from "react";
 
 export default function AllProducts() {
@@ -19,7 +19,7 @@ export default function AllProducts() {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const res = await axios.get(
+        const res = await api.get(
           "http://localhost:5000/api/product/products",
           {
             params: filters,

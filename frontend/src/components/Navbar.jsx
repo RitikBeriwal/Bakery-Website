@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Menu, X, ChevronDown } from "lucide-react";
 import { Link } from "react-router-dom";
-import axios from "axios";
+import api from "./api/axios";
 import { useSelector } from "react-redux";
 import logo from "../assets/homePage/logo White.png";
 import { FaShoppingCart } from "react-icons/fa";
@@ -20,7 +20,7 @@ const Navbar = () => {
     const fetchCategories = async () => {
       try {
         setLoading(true);
-        const response = await axios.get("http://localhost:5000/api/product", {
+        const response = await api.get("http://localhost:5000/api/product", {
           params: { limit: 100 },
         });
 
@@ -52,7 +52,7 @@ const Navbar = () => {
           const token = localStorage.getItem("userToken");
           if (!token) return setUser(null);
 
-          const res = await axios.get("http://localhost:5000/api/auth/me", {
+          const res = await api.get("http://localhost:5000/api/auth/me", {
             headers: { Authorization: `Bearer ${token}` },
           });
 

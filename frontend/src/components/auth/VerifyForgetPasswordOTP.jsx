@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
+import api from "../api/axios";
 import { useNavigate } from "react-router-dom";
 
 const VerifyForgetPasswordOTP = () => {
@@ -23,7 +23,7 @@ const VerifyForgetPasswordOTP = () => {
     e.preventDefault();
 
     try {
-      const res = await axios.post(
+      const res = await api.post(
         "http://localhost:5000/api/auth/verify-otp",
         {
           email,
