@@ -53,16 +53,7 @@ app.use((req, res, next) => {
 });
 
 // Middleware
-app.use(
-  cors({
-    origin: [
-      "http://localhost:3000",
-      "http://localhost:5173",
-      "https://bakery-website-1-s1ct.onrender.com",
-    ],
-    credentials: true,
-  })
-);
+app.use(cors({ origin: "*" }));
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
