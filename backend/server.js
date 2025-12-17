@@ -55,10 +55,15 @@ app.use((req, res, next) => {
 // Middleware
 app.use(
   cors({
-    origin: ["http://localhost:3000", "http://localhost:5173"],
+    origin: [
+      "http://localhost:3000",
+      "http://localhost:5173",
+      "https://bakery-website-1-s1ct.onrender.com",
+    ],
     credentials: true,
   })
 );
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -120,7 +125,8 @@ try {
   const cartRoutes = require("./src/routes/cartRoutes");
   const productRoutes = require("./src/routes/productRoutes");
   const orderRoutes = require("./src/routes/orderRoutes");
-  const customizationRoutes = require("./src/routes/CustomizatonRoutes");
+  const customizationRoutes = require("./src/routes/CustomizationRoutes");
+  const contactRoutes = require("./src/routes/ContactRoutes");
 
   // Mount routes
   app.use("/api/user", userRoutes);
@@ -130,6 +136,7 @@ try {
   app.use("/api/product", productRoutes);
   app.use("/api/orders", orderRoutes);
   app.use("/api/customizations", customizationRoutes);
+  app.use("/api/contact", contactRoutes);
 
   console.log("✅ All routes mounted successfully");
 } catch (error) {

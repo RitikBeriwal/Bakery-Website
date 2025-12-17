@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 
-const customizationController = require("../controllers/CustomizationController");
+const customizationController = require("../controllers/customizationController");
 const protect = require("../middlewares/authMiddleware");
 const designUpload = require("../middlewares/designUploadMiddleware");
 

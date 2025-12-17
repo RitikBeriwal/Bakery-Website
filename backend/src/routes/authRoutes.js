@@ -6,7 +6,7 @@ const path = require("path");
 const fs = require("fs");
 
 const User = require("../models/User");
-const Otp = require("../models/otp");
+const Otp = require("../models/Otp");
 
 const { sendOTPEmail } = require("../utils/sendOTP");
 const { sendWhatsAppOTP } = require("../utils/sendWhatsappOTP");
