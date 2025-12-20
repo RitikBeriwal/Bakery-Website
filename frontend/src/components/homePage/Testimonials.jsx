@@ -33,7 +33,7 @@ const Testimonial = () => {
     ];
 
     return (
-        <section className="w-full py-32 bg-[#e2bf9d] relative overflow-hidden">
+        <section className="w-full pt-30 pb-10 bg-[#e2bf9d] relative overflow-hidden">
 
             {/* Centered faded CLIENTS text (background) */}
             <h1

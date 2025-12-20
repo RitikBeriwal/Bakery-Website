@@ -121,6 +121,7 @@ try {
   const productRoutes = require("./src/routes/productRoutes");
   const orderRoutes = require("./src/routes/orderRoutes");
   const customizationRoutes = require("./src/routes/CustomizatonRoutes");
+  const contactRoutes = require("./src/routes/ContactRoutes");
 
   // Mount routes
   app.use("/api/user", userRoutes);
@@ -130,6 +131,7 @@ try {
   app.use("/api/product", productRoutes);
   app.use("/api/orders", orderRoutes);
   app.use("/api/customizations", customizationRoutes);
+  app.use("/api/contact", contactRoutes);
 
   console.log("✅ All routes mounted successfully");
 } catch (error) {

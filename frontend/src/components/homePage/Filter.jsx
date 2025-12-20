@@ -34,6 +34,13 @@ export default function FilterPage() {
   const [showFilters, setShowFilters] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [showProductModal, setShowProductModal] = useState(false);
+  useEffect(() => {
+    window.scrollTo({
+      top: 0,
+      left: 0,
+      behavior: "instant",
+    });
+  }, []);
 
   // Filter states
   const [filters, setFilters] = useState({
@@ -83,15 +90,40 @@ export default function FilterPage() {
       const el = document.getElementById(id);
       if (!el) return;
 
-      window.scrollTo({ top: 0, behavior: "instant" });
-      el.scrollIntoView({ behavior: "smooth", block: "start" });
+      el.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
 
-      // ✅ CRITICAL: clear navigation state
+      // ✅ clear navigation state (VERY IMPORTANT)
       navigate(location.pathname, { replace: true, state: {} });
-    }, 200);
+    }, 300);
 
     return () => clearTimeout(timer);
   }, [location.state, loading, navigate]);
+
+  //   if (loading) return;
+
+  //   if (!location.state?.fromFooter) return;
+
+  //   const category = location.state.category;
+  //   if (!category) return;
+
+  //   const id = "category-" + category.trim().replace(/\s+/g, "-").toLowerCase();
+
+  //   const timer = setTimeout(() => {
+  //     const el = document.getElementById(id);
+  //     if (!el) return;
+
+  //     window.scrollTo({ top: 0, behavior: "instant" });
+  //     el.scrollIntoView({ behavior: "smooth", block: "start" });
+
+  //     // ✅ CRITICAL: clear navigation state
+  //     navigate(location.pathname, { replace: true, state: {} });
+  //   }, 200);
+
+  //   return () => clearTimeout(timer);
+  // }, [location.state, loading, navigate]);
 
   // Fetch all products
   useEffect(() => {
@@ -145,30 +177,12 @@ export default function FilterPage() {
           setFlavors(Array.from(extractedFlavors).sort());
 
           // Extract weights from tags and descriptions
-          const weightPatterns = [
-            "0.5kg",
-            "0.5 kg",
-            "1kg",
-            "1 kg",
-            "2kg",
-            "2 kg",
-            "3kg",
-            "3 kg",
-            "4kg",
-            "4 kg",
-            "5kg",
-            "5 kg",
-          ];
+          // Extract weights directly from product field (CORRECT)
           const extractedWeights = new Set();
           products.forEach((p) => {
-            const text = `${p.name} ${p.description} ${(p.tags || []).join(
-              " "
-            )}`.toLowerCase();
-            weightPatterns.forEach((weight) => {
-              if (text.includes(weight.toLowerCase())) {
-                extractedWeights.add(weight);
-              }
-            });
+            if (p.weight) {
+              extractedWeights.add(p.weight.toLowerCase());
+            }
           });
           setWeights(Array.from(extractedWeights).sort());
 
@@ -213,12 +227,9 @@ export default function FilterPage() {
 
     // Weight filter
     if (filters.weight) {
-      filtered = filtered.filter((p) => {
-        const text = `${p.name} ${p.description} ${(p.tags || []).join(
-          " "
-        )}`.toLowerCase();
-        return text.includes(filters.weight.toLowerCase());
-      });
+      filtered = filtered.filter(
+        (p) => p.weight?.toLowerCase() === filters.weight.toLowerCase()
+      );
     }
 
     // Flavor filter
@@ -319,8 +330,10 @@ export default function FilterPage() {
     if (!product) return;
 
     if (!isLoggedIn()) {
-      toast.error("Please login to add items to cart");
-      navigate("/login");
+      toast.error("Please login to continue");
+      navigate("/login", {
+        state: { from: "/menu", scrollToTop: true },
+      });
       return;
     }
 
@@ -808,7 +821,7 @@ export default function FilterPage() {
                   </button>
                   {(weights.length > 0
                     ? weights
-                    : ["0.5kg", "1kg", "2kg", "3kg", "4kg", "5kg"]
+                    : ["120g", "130g", "150g", "1kg"]
                   ).map((weight) => (
                     <button
                       key={weight}
@@ -957,7 +970,7 @@ export default function FilterPage() {
                         {/* LEFT BUTTON */}
                         <button
                           onClick={() => scrollCategory(category, "left")}
-                          className="hidden md:flex absolute left-0 top-1/2 -translate-y-1/2 
+                          className="md:flex absolute -left-4 md:-left-6 lg:-left-8 top-1/2 -translate-y-1/2 
                bg-white shadow-lg p-2 rounded-full z-10"
                         >
                           <FaChevronLeft className="text-[#8b5e3c]" />
@@ -1052,7 +1065,7 @@ export default function FilterPage() {
                         {/* RIGHT BUTTON */}
                         <button
                           onClick={() => scrollCategory(category, "right")}
-                          className="hidden md:flex absolute right-0 top-1/2 -translate-y-1/2 
+                          className="md:flex absolute -right-4 md:-right-6 lg:-right-8 top-1/2 -translate-y-1/2 
                bg-white shadow-lg p-2 rounded-full z-10"
                         >
                           <FaChevronRight className="text-[#8b5e3c]" />

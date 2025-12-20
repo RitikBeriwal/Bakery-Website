@@ -299,6 +299,7 @@ export default function Profile() {
       });
 
       localStorage.removeItem("userToken");
+      localStorage.removeItem("userInfo");
       navigate("/login");
     } catch (err) {
       alert("Failed to delete account.", err);

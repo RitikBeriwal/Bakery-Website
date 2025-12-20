@@ -1,10 +1,14 @@
 import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
+import { toast } from "react-hot-toast";
+import { useDispatch, useSelector } from "react-redux";
+import { addToCart, selectCart } from "../redux/Slice";
 
 const API_BASE = "http://localhost:5000/api/product";
 
+/* ================= Animations ================= */
 const fadeUp = {
   hidden: { opacity: 0, y: 40 },
   visible: {
@@ -17,15 +21,65 @@ const fadeUp = {
 const containerStagger = {
   hidden: {},
   visible: {
-    transition: {
-      staggerChildren: 0.25,
-    },
+    transition: { staggerChildren: 0.25 },
   },
 };
 
 const FeaturedProducts = () => {
   const [featuredProducts, setFeaturedProducts] = useState([]);
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
 
+  const { items } = useSelector(selectCart);
+
+  /* =====================================================
+     BUY NOW → ADD TO CART → REDIRECT TO ORDER
+  ===================================================== */
+  const handleOrderNow = (product) => {
+    const token =
+      localStorage.getItem("token") ||
+      localStorage.getItem("authToken") ||
+      sessionStorage.getItem("token") ||
+      sessionStorage.getItem("authToken");
+
+    // ❌ Not logged in
+    if (!token) {
+      toast.error("Please login to continue");
+      navigate("/login", { state: { from: "/order" } });
+      return;
+    }
+
+    // ❌ Out of stock
+    if (product.stock <= 0) {
+      toast.error("This product is out of stock");
+      return;
+    }
+
+    // ✅ Prevent duplicate add
+    const alreadyInCart = items.find((item) => item.id === product._id);
+
+    if (!alreadyInCart) {
+      dispatch(
+        addToCart({
+          id: product._id,
+          name: product.name,
+          price: product.price,
+          image: product.images?.[0]
+            ? product.images[0].startsWith("http")
+              ? product.images[0]
+              : `http://localhost:5000${product.images[0]}`
+            : "",
+          qty: 1,
+        })
+      );
+    }
+
+    navigate("/order");
+  };
+
+  /* =====================================================
+     FETCH FEATURED PRODUCTS
+  ===================================================== */
   useEffect(() => {
     const fetchProducts = async () => {
       try {
@@ -74,7 +128,7 @@ const FeaturedProducts = () => {
             whileHover={{ scale: 1.04, y: -8 }}
             className="bg-[#fff9f4] rounded-2xl shadow-lg flex flex-col"
           >
-            {/* Image */}
+            {/* IMAGE */}
             <img
               src={
                 item.images?.[0]
@@ -87,7 +141,7 @@ const FeaturedProducts = () => {
               className="w-full h-56 object-cover rounded-t-2xl"
             />
 
-            {/* Content */}
+            {/* CONTENT */}
             <div className="p-6 flex flex-col flex-grow">
               <h3 className="text-xl font-bold text-[#8b5e3c]">{item.name}</h3>
 
@@ -102,11 +156,12 @@ const FeaturedProducts = () => {
                   ₹{item.price}
                 </span>
 
-                <Link to={`/product/${item._id}`}>
-                  <button className="px-5 py-2 rounded-full bg-gradient-to-r from-[#dda56a] to-[#e8b381] text-white font-semibold">
-                    Order Now
-                  </button>
-                </Link>
+                <button
+                  onClick={() => handleOrderNow(item)}
+                  className="px-5 py-2 rounded-full bg-gradient-to-r from-[#dda56a] to-[#e8b381] text-white font-semibold hover:scale-105 transition"
+                >
+                  Buy Now
+                </button>
               </div>
             </div>
           </motion.div>
