@@ -78,7 +78,7 @@ const Orders = () => {
       const token = localStorage.getItem("adminToken");
 
       const response = await axios.get(
-        "http://localhost:5000/api/admin/orders",
+        "/api/admin/orders",
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -143,7 +143,7 @@ const Orders = () => {
       const token = localStorage.getItem("adminToken");
 
       const response = await axios.put(
-        `http://localhost:5000/api/admin/orders/${orderId}/status`,
+        `/api/admin/orders/${orderId}/status`,
         { status: newStatus },
         {
           headers: { Authorization: `Bearer ${token}` },

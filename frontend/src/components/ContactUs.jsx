@@ -27,7 +27,7 @@ function ContactUs() {
     }
 
     try {
-      const res = await fetch("http://localhost:5000/api/contact/contact-us", {
+      const res = await fetch("/api/contact/contact-us", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -45,7 +45,7 @@ function ContactUs() {
       setError("");
       setForm({ name: "", email: "", message: "" });
     } catch (err) {
-      setError("Failed to send message. Try again later.");
+      setError("Failed to send message. Try again later.",err);
       setSuccess("");
     }
   };

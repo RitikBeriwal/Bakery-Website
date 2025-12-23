@@ -24,7 +24,7 @@ const AdminLogin = () => {
 
     try {
       const response = await axios.post(
-        "http://localhost:5000/api/admin/login",
+        "/api/admin/login",
         {
           email: form.email,
           password: form.password,

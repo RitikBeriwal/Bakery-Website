@@ -14,7 +14,7 @@ const AllUsers = () => {
   // Fetch all users
   const fetchUsers = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/api/admin/users", {
+      const res = await axios.get("/api/admin/users", {
         headers: { Authorization: `Bearer ${token}` },
       });
 
@@ -44,7 +44,7 @@ const AllUsers = () => {
     try {
       if (modalAction === "delete") {
         await axios.delete(
-          `http://localhost:5000/api/admin/user/${selectedUser._id}`,
+          `/api/admin/user/${selectedUser._id}`,
           { headers: { Authorization: `Bearer ${token}` } }
         );
 
@@ -53,7 +53,7 @@ const AllUsers = () => {
         const shouldBlock = modalAction === "block";
 
         await axios.patch(
-          `http://localhost:5000/api/admin/user/block/${selectedUser._id}`,
+          `/api/admin/user/block/${selectedUser._id}`,
           { blocked: shouldBlock },
           { headers: { Authorization: `Bearer ${token}` } }
         );

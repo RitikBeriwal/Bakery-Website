@@ -81,7 +81,7 @@ export default function CreateProductModal({ onClose, onSave }) {
   useEffect(() => {
     const fetchOptions = async () => {
       try {
-        const res = await axios.get("http://localhost:5000/api/product");
+        const res = await axios.get("/api/admin/product");
 
         if (res.data?.success) {
           const products = res.data.products;
@@ -221,7 +221,7 @@ export default function CreateProductModal({ onClose, onSave }) {
 
       // IMPORTANT: Use admin route for product creation
       const res = await axios.post(
-        "http://localhost:5000/api/admin/product", // Changed to admin route
+        "/api/admin/product", // Changed to admin route
         formData,
         {
           headers: {

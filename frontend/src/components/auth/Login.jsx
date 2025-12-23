@@ -63,7 +63,7 @@ const Login = () => {
 
       if (isAdminLogin) {
         // Admin login
-        response = await axios.post("http://localhost:5000/api/admin/login", {
+        response = await axios.post("/api/admin/login", {
           email: form.email,
           password: form.password,
         });
@@ -87,7 +87,7 @@ const Login = () => {
         navigate("/admin/dashboard");
       } else {
         // User login
-        response = await axios.post("http://localhost:5000/api/auth/login", {
+        response = await axios.post("/api/auth/login", {
           email: form.email,
           password: form.password,
         });

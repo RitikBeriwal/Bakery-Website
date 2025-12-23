@@ -106,7 +106,7 @@ const VerifyOTP = () => {
       console.log("🔄 Verifying OTP for:", userDetails.email);
 
       const res = await axios.post(
-        `http://localhost:5000/api/auth/verify-otp`,
+        `/api/auth/verify-otp`,
         payload
       );
 
@@ -147,7 +147,7 @@ const VerifyOTP = () => {
     if (!canResend) return;
 
     try {
-      await axios.post(`http://localhost:5000/api/auth/send-otp`, {
+      await axios.post(`/api/auth/send-otp`, {
         email: userDetails.email || undefined,
         phone: userDetails.phone || undefined,
       });

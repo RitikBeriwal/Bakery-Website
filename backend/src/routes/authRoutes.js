@@ -39,7 +39,7 @@ const upload = multer({ storage, fileFilter });
 /* ============================================================
    REGISTER → Sends OTP via Email + WhatsApp
 ============================================================ */
-router.post("/register", async (req, res) => {
+router.post("/auth/register", async (req, res) => {
   const { name, email, password, phone } = req.body;
 
   try {
@@ -83,7 +83,7 @@ router.post("/register", async (req, res) => {
 /* ============================================================
    SEND OTP AGAIN
 ============================================================ */
-router.post("/send-otp", async (req, res) => {
+router.post("/auth/send-otp", async (req, res) => {
   const { email, phone } = req.body;
   try {
     const otp = generateOTP();
@@ -114,7 +114,7 @@ router.post("/send-otp", async (req, res) => {
 /* ============================================================
    VERIFY OTP
 ============================================================ */
-router.post("/verify-otp", async (req, res) => {
+router.post("/auth/verify-otp", async (req, res) => {
   const { email, phone, otp, purpose } = req.body;
 
   if (!otp) {
@@ -164,7 +164,7 @@ router.post("/verify-otp", async (req, res) => {
 /* ============================================================
    SET USERNAME → CREATE USER + RETURN TOKEN
 ============================================================ */
-router.post("/set-username", async (req, res, next) => {
+router.post("/auth/set-username", async (req, res, next) => {
   try {
     const { username, email, phone } = req.body;
 
@@ -285,7 +285,7 @@ router.post("/login", async (req, res) => {
 /* ============================================================
    GET LOGGED-IN USER DETAILS
 ============================================================ */
-router.get("/me", authMiddleware, async (req, res) => {
+router.get("/auth/me", authMiddleware, async (req, res) => {
   try {
     res.status(200).json({
       success: true,
@@ -303,7 +303,7 @@ router.get("/me", authMiddleware, async (req, res) => {
 // ============================================================
 // LOGOUT
 // ============================================================
-router.post("/logout", (req, res) => {
+router.post("/auth/logout", (req, res) => {
   // Frontend will delete the token
   return res.status(200).json({
     success: true,

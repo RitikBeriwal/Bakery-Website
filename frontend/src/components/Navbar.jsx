@@ -9,7 +9,7 @@ import { FaShoppingCart } from "react-icons/fa";
 const Navbar = () => {
   const [open, setOpen] = useState(false);
   const [user, setUser] = useState(null);
-  const [categories, setCategories] = useState([]);
+  const [setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
 
   const cart = useSelector((state) => state.cart || { items: [] });
@@ -20,7 +20,7 @@ const Navbar = () => {
     const fetchCategories = async () => {
       try {
         setLoading(true);
-        const response = await axios.get("http://localhost:5000/api/product", {
+        const response = await axios.get("/api/product", {
           params: { limit: 100 },
         });
 

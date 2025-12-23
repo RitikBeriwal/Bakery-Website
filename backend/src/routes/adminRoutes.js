@@ -5,6 +5,7 @@ const User = require("../models/User");
 const Product = require("../models/Product");
 const Order = require("../models/Order");
 const CustomCakeOrder = require("../models/CustomCakeOrder");
+const JWT = require("jsonwebtoken");
 const { uploadDisk } = require("../middlewares/uploadMiddleware");
 
 const adminAuth = require("../middlewares/adminMiddleware");
@@ -15,7 +16,7 @@ const router = express.Router();
 /* ============================================================
    FIRST SUPER ADMIN REGISTER (ONE-TIME ONLY)
 ============================================================ */
-router.post("/register-super-admin", async (req, res) => {
+router.post("/admin/register-super-admin", async (req, res) => {
   console.log("🔥 Route hit: /register-super-admin");
 
   try {
@@ -56,7 +57,7 @@ router.post("/register-super-admin", async (req, res) => {
 /* ============================================================
    ADMIN LOGIN (For Admin + Super Admin)
 ============================================================ */
-router.post("/login", async (req, res) => {
+router.post("/admin/login", async (req, res) => {
   try {
     const { email, password } = req.body;
 
@@ -67,7 +68,18 @@ router.post("/login", async (req, res) => {
     if (!isMatch)
       return res.status(400).json({ message: "Incorrect password" });
 
-    const token = admin.generateToken();
+    const token = JWT.sign(
+      { id: admin._id, role: admin.role },
+      process.env.JWT_SECRET,
+      { expiresIn: "7d" }
+    );
+
+    res.cookie("adminToken", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "Strict",
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    });
 
     res.json({
       success: true,
@@ -83,7 +95,7 @@ router.post("/login", async (req, res) => {
 /* ============================================================
    SUPER ADMIN → Create Admin
 ============================================================ */
-router.post("/create", superAdminAuth, async (req, res) => {
+router.post("/admin/create", superAdminAuth, async (req, res) => {
   try {
     const { name, email, password, role } = req.body;
 
@@ -111,7 +123,7 @@ router.post("/create", superAdminAuth, async (req, res) => {
 /* ============================================================
    SUPER ADMIN → Get All Admins
 ============================================================ */
-router.get("/admins", superAdminAuth, async (req, res) => {
+router.get("/admin/admins", superAdminAuth, async (req, res) => {
   try {
     const admins = await Admin.find().select("-password");
     res.json({ success: true, admins });
@@ -123,7 +135,7 @@ router.get("/admins", superAdminAuth, async (req, res) => {
 /* ============================================================
    SUPER ADMIN → Delete Admin
 ============================================================ */
-router.delete("/:id", superAdminAuth, async (req, res) => {
+router.delete("/admin/:id", superAdminAuth, async (req, res) => {
   try {
     const admin = await Admin.findByIdAndDelete(req.params.id);
     if (!admin) return res.status(404).json({ message: "Admin not found" });
@@ -137,7 +149,7 @@ router.delete("/:id", superAdminAuth, async (req, res) => {
 /* ============================================================
    SUPER ADMIN → Block / Unblock Admin
 ============================================================ */
-router.patch("/admins/block/:id", superAdminAuth, async (req, res) => {
+router.patch("/admin/admins/block/:id", superAdminAuth, async (req, res) => {
   try {
     const { blocked } = req.body;
 
@@ -159,7 +171,7 @@ router.patch("/admins/block/:id", superAdminAuth, async (req, res) => {
 /* ============================================================
    ADMIN + SUPER ADMIN → Get All Products
 ============================================================ */
-router.get("/products", adminAuth, async (req, res) => {
+router.get("/admin/products", adminAuth, async (req, res) => {
   try {
     console.log("📦 Fetching all products...");
     const products = await Product.find().sort({ createdAt: -1 });
@@ -175,7 +187,7 @@ router.get("/products", adminAuth, async (req, res) => {
    ADMIN + SUPER ADMIN → Add Product
 ============================================================ */
 router.post(
-  "/product",
+  "/admin/product",
   adminAuth,
   uploadDisk.array("images", 10),
   async (req, res) => {
@@ -227,7 +239,7 @@ router.post(
 /* ============================================================
    ADMIN + SUPER ADMIN → Get Single Product
 ============================================================ */
-router.get("/product/:id", adminAuth, async (req, res) => {
+router.get("/admin/product/:id", adminAuth, async (req, res) => {
   try {
     const product = await Product.findById(req.params.id);
 
@@ -294,7 +306,7 @@ router.put("/product/:id", adminAuth, async (req, res) => {
 /* ============================================================
    ADMIN + SUPER ADMIN → Delete Product
 ============================================================ */
-router.delete("/product/:id", adminAuth, async (req, res) => {
+router.delete("/admin/product/:id", adminAuth, async (req, res) => {
   try {
     const product = await Product.findByIdAndDelete(req.params.id);
     if (!product) return res.status(404).json({ message: "Product not found" });
@@ -308,7 +320,7 @@ router.delete("/product/:id", adminAuth, async (req, res) => {
 /* ============================================================
    ADMIN + SUPER ADMIN → Get All Users
 ============================================================ */
-router.get("/users", adminAuth, async (req, res) => {
+router.get("/admin/users", adminAuth, async (req, res) => {
   try {
     const users = await User.find().select("-password");
     res.json({ success: true, users });
@@ -320,7 +332,7 @@ router.get("/users", adminAuth, async (req, res) => {
 /* ============================================================
    ADMIN + SUPER ADMIN → Delete User
 ============================================================ */
-router.delete("/user/:id", adminAuth, async (req, res) => {
+router.delete("/admin/user/:id", adminAuth, async (req, res) => {
   try {
     const user = await User.findByIdAndDelete(req.params.id);
     if (!user) return res.status(404).json({ message: "User not found" });
@@ -334,7 +346,7 @@ router.delete("/user/:id", adminAuth, async (req, res) => {
 /* ============================================================
    ADMIN + SUPER ADMIN → Block / Unblock User
 ============================================================ */
-router.patch("/user/block/:id", adminAuth, async (req, res) => {
+router.patch("/admin/user/block/:id", adminAuth, async (req, res) => {
   try {
     const { blocked } = req.body; // expected true or false
 
@@ -359,7 +371,7 @@ router.patch("/user/block/:id", adminAuth, async (req, res) => {
 /* ============================================================
    ADMIN + SUPER ADMIN → Get All Orders (Both Regular & Custom)
 ============================================================ */
-router.get("/orders", adminAuth, async (req, res) => {
+router.get("/admin/orders", adminAuth, async (req, res) => {
   try {
     // Get regular orders
     const regularOrders = await Order.find()
@@ -426,7 +438,7 @@ router.get("/orders", adminAuth, async (req, res) => {
 /* ============================================================
    ADMIN + SUPER ADMIN → Get Single Order Details
 ============================================================ */
-router.get("/orders/:id", adminAuth, async (req, res) => {
+router.get("/admin/orders/:id", adminAuth, async (req, res) => {
   try {
     const { id } = req.params;
 
@@ -472,7 +484,7 @@ router.get("/orders/:id", adminAuth, async (req, res) => {
 /* ============================================================
    ADMIN + SUPER ADMIN → Update Order Status
 ============================================================ */
-router.put("/orders/:id/status", adminAuth, async (req, res) => {
+router.put("/admin/orders/:id/status", adminAuth, async (req, res) => {
   try {
     const { id } = req.params;
     const { status } = req.body;
@@ -544,7 +556,7 @@ router.put("/orders/:id/status", adminAuth, async (req, res) => {
 /* ============================================================
    ADMIN + SUPER ADMIN → Delete Order
 ============================================================ */
-router.delete("/orders/:id", adminAuth, async (req, res) => {
+router.delete("/admin/orders/:id", adminAuth, async (req, res) => {
   try {
     const { id } = req.params;
 
@@ -577,7 +589,7 @@ router.delete("/orders/:id", adminAuth, async (req, res) => {
 /* ============================================================
    ADMIN + SUPER ADMIN → Update Payment Status
 ============================================================ */
-router.put("/orders/:id/payment-status", adminAuth, async (req, res) => {
+router.put("/adminorders/:id/payment-status", adminAuth, async (req, res) => {
   try {
     const { id } = req.params;
     const { paymentStatus } = req.body;
@@ -642,7 +654,7 @@ router.put("/orders/:id/payment-status", adminAuth, async (req, res) => {
 /* ============================================================
    ADMIN DASHBOARD (Enhanced Analytics with Orders)
 ============================================================ */
-router.get("/dashboard", adminAuth, async (req, res) => {
+router.get("/admin/dashboard", adminAuth, async (req, res) => {
   try {
     const users = await User.countDocuments();
     const products = await Product.countDocuments();
@@ -714,7 +726,7 @@ router.get("/dashboard", adminAuth, async (req, res) => {
 /* ============================================================
    ADMIN + SUPER ADMIN → Get Recent Orders (for dashboard)
 ============================================================ */
-router.get("/recent-orders", adminAuth, async (req, res) => {
+router.get("/admin/recent-orders", adminAuth, async (req, res) => {
   try {
     const limit = parseInt(req.query.limit) || 10;
 

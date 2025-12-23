@@ -29,7 +29,7 @@ const CreateAdmin = () => {
     try {
       const token = localStorage.getItem("adminToken");
 
-      await axios.post("http://localhost:5000/api/admin/create", form, {
+      await axios.post("/api/admin/create", form, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
