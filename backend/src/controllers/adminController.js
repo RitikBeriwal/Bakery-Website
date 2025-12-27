@@ -1,18 +1,17 @@
-
 const Admin = require("../models/Admin");
 const User = require("../models/User");
 const Product = require("../models/Product");
 const Order = require("../models/Order");
 const CustomCakeOrder = require("../models/CustomCakeOrder");
-
+const Otp = require("../models/Otp");
+const bcrypt = require("bcryptjs");
+const generateOTP = require("../utils/generateOTP");
+const { sendOTPEmail } = require("../utils/sendOTP");
 /* ================= SUPER ADMIN ================= */
-
-
 
 exports.registerSuperAdmin = async (req, res) => {
   try {
     const { name, email, password, secretKey } = req.body;
-
 
     if (!secretKey) {
       return res.status(400).json({
@@ -20,7 +19,9 @@ exports.registerSuperAdmin = async (req, res) => {
       });
     }
 
-    if (String(secretKey).trim() !== String(process.env.SUPER_ADMIN_SECRET).trim()) {
+    if (
+      String(secretKey).trim() !== String(process.env.SUPER_ADMIN_SECRET).trim()
+    ) {
       return res.status(403).json({
         message: "Invalid secret key",
       });
@@ -53,28 +54,45 @@ exports.registerSuperAdmin = async (req, res) => {
   }
 };
 
-
-
-
 exports.adminLogin = async (req, res) => {
   try {
     const { email, password } = req.body;
 
     const admin = await Admin.findOne({ email }).select("+password");
-    if (!admin) return res.status(404).json({ message: "Admin not found" });
+    if (!admin) {
+      return res.status(400).json({
+        success: false,
+        message: "Admin not found",
+      });
+    }
+
+    if (admin.isBlocked) {
+      return res.status(403).json({
+        success: false,
+        message: "Admin account blocked",
+      });
+    }
 
     const isMatch = await admin.comparePassword(password);
-    if (!isMatch) return res.status(400).json({ message: "Incorrect password" });
+    if (!isMatch) {
+      return res.status(400).json({
+        success: false,
+        message: "Incorrect password",
+      });
+    }
 
     const token = admin.generateToken();
 
     res.json({
       success: true,
       token,
-      admin: { id: admin._id, email: admin.email, role: admin.role },
+      admin,
     });
-  } catch (err) {
-    res.status(500).json({ message: err.message });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
   }
 };
 
@@ -101,13 +119,10 @@ exports.createAdmin = async (req, res) => {
 };
 
 exports.getAdmins = async (req, res) => {
-  const admins = await Admin.find()
-    .select("-password")
-    .sort({ createdAt: -1 }); // 🔥 NEWEST FIRST
+  const admins = await Admin.find().select("-password").sort({ createdAt: -1 }); // 🔥 NEWEST FIRST
 
   res.json({ success: true, admins });
 };
-
 
 exports.deleteAdmin = async (req, res) => {
   if (req.admin._id.toString() === req.params.id) {
@@ -120,7 +135,6 @@ exports.deleteAdmin = async (req, res) => {
   await Admin.findByIdAndDelete(req.params.id);
   res.json({ success: true });
 };
-
 
 /* ================= PRODUCTS ================= */
 
@@ -162,7 +176,6 @@ exports.createProduct = async (req, res) => {
   }
 };
 
-
 exports.updateProduct = async (req, res) => {
   const product = await Product.findByIdAndUpdate(req.params.id, req.body, {
     new: true,
@@ -178,18 +191,15 @@ exports.deleteProduct = async (req, res) => {
 /* ================= USERS ================= */
 
 exports.getUsers = async (req, res) => {
-  const users = await User.find()
-    .select("-password")
-    .sort({ createdAt: -1 }); // 🔥 NEWEST FIRST
+  const users = await User.find().select("-password").sort({ createdAt: -1 }); // 🔥 NEWEST FIRST
 
   res.json({ success: true, users });
 };
 
-
-exports.deleteUser = async (req, res) => {
-  await User.findByIdAndDelete(req.params.id);
-  res.json({ success: true });
-};
+// exports.deleteUser = async (req, res) => {
+//   await User.findByIdAndDelete(req.params.id);
+//   res.json({ success: true });
+// };
 
 /* ================= ORDERS ================= */
 
@@ -197,7 +207,6 @@ exports.getOrders = async (req, res) => {
   const orders = await Order.find().populate("user", "name email");
   res.json({ success: true, orders });
 };
-
 
 /* ================= UPDATE ORDER STATUS ================= */
 exports.updateOrderStatus = async (req, res) => {
@@ -312,17 +321,17 @@ exports.getAdminProfile = async (req, res) => {
   try {
     // Use req.admin._id instead of req.admin.id
     const admin = await Admin.findById(req.admin._id).select("-password");
-    
+
     if (!admin) {
       return res.status(404).json({
         success: false,
-        message: "Admin not found"
+        message: "Admin not found",
       });
     }
 
     res.json({
       success: true,
-      admin
+      admin,
     });
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -332,7 +341,7 @@ exports.getAdminProfile = async (req, res) => {
 exports.updateAdminProfile = async (req, res) => {
   try {
     const { name, phone } = req.body;
-    
+
     const updateData = {};
     if (name) updateData.name = name;
     if (phone) updateData.phone = phone;
@@ -347,14 +356,14 @@ exports.updateAdminProfile = async (req, res) => {
     if (!admin) {
       return res.status(404).json({
         success: false,
-        message: "Admin not found"
+        message: "Admin not found",
       });
     }
 
     res.json({
       success: true,
       message: "Profile updated successfully",
-      admin
+      admin,
     });
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -365,11 +374,11 @@ exports.uploadAdminProfilePic = async (req, res) => {
   try {
     // Use req.admin._id
     const adminId = req.admin._id;
-    
+
     if (!req.cloudinaryFiles || req.cloudinaryFiles.length === 0) {
       return res.status(400).json({
         success: false,
-        message: "No image uploaded"
+        message: "No image uploaded",
       });
     }
 
@@ -384,14 +393,14 @@ exports.uploadAdminProfilePic = async (req, res) => {
     if (!admin) {
       return res.status(404).json({
         success: false,
-        message: "Admin not found"
+        message: "Admin not found",
       });
     }
 
     res.json({
       success: true,
       message: "Profile picture uploaded successfully",
-      profilePicture: admin.profilePicture
+      profilePicture: admin.profilePicture,
     });
   } catch (err) {
     console.error("Upload profile pic error:", err);
@@ -403,3 +412,121 @@ exports.deleteUser = async (req, res) => {
   res.json({ success: true });
 };
 
+exports.adminForgotPassword = async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    const admin = await Admin.findOne({ email });
+    if (!admin) {
+      return res.status(404).json({
+        success: false,
+        message: "Admin not found",
+      });
+    }
+
+    const otp = generateOTP();
+
+    await Otp.create({
+      email,
+      code: String(otp),
+      purpose: "admin-forgot-password",
+      expiresAt: Date.now() + 5 * 60 * 1000,
+    });
+
+    await sendOTPEmail(email, otp);
+
+    res.json({
+      success: true,
+      message: "OTP sent to admin email",
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+/* ================= ADMIN RESET PASSWORD ================= */
+exports.adminResetPassword = async (req, res) => {
+  try {
+    const { email, newPassword, confirmPassword } = req.body;
+
+    if (newPassword !== confirmPassword) {
+      return res.status(400).json({
+        success: false,
+        message: "Passwords do not match",
+      });
+    }
+
+    const otpRecord = await Otp.findOne({
+      email,
+      purpose: "admin-forgot-password",
+      expiresAt: { $gt: Date.now() },
+    });
+
+    if (!otpRecord) {
+      return res.status(400).json({
+        success: false,
+        message: "OTP expired or invalid",
+      });
+    }
+
+    const admin = await Admin.findOne({ email });
+    if (!admin) {
+      return res.status(404).json({
+        success: false,
+        message: "Admin not found",
+      });
+    }
+
+    // 🔥 IMPORTANT FIX
+    admin.password = newPassword;
+    await admin.save();
+
+    await Otp.deleteMany({ email, purpose: "admin-forgot-password" });
+
+    res.json({
+      success: true,
+      message: "Admin password reset successful",
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+/* ================= ADMIN VERIFY OTP ================= */
+exports.adminVerifyOtp = async (req, res) => {
+  try {
+    const { email, otp } = req.body;
+
+    if (!otp) {
+      return res.status(400).json({
+        success: false,
+        message: "OTP required",
+      });
+    }
+
+    const record = await Otp.findOne({
+      email,
+      code: String(otp),
+      purpose: "admin-forgot-password",
+      expiresAt: { $gt: Date.now() },
+    }).sort({ createdAt: -1 });
+
+    if (!record) {
+      return res.status(400).json({
+        success: false,
+        message: "OTP not found or expired",
+      });
+    }
+
+    res.json({
+      success: true,
+      message: "OTP verified successfully",
+    });
+  } catch (error) {
+    console.error("❌ Admin OTP verification error:", error);
+    res.status(500).json({
+      success: false,
+      message: "OTP verification failed",
+    });
+  }
+};

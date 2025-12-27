@@ -1,10 +1,12 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
+import AdminResetPassword from "./components/auth/AdminResetPassword";
 
 /* ---------- LAYOUTS ---------- */
 import MainLayout from "./components/layout/MainLayout";
 import AuthLayout from "./components/layout/AuthLayout";
 import DashboardLayout from "./components/layout/DashboardLayout";
+import AdminVerifyForgotPasswordOTP from "./components/auth/AdminVerifyForgotPasswordOTP";
 
 /* ---------- PROTECTED ---------- */
 import ProtectedRoutes from "./components/ProtectedRoutes";
@@ -52,10 +54,11 @@ import CreateAdmin from "./components/admin/CreateAdmin";
 import AdminList from "./components/admin/AdminList";
 import AllUsers from "./components/admin/AllUsers";
 import SuperAdminRegister from "./components/admin/SuperAdminRegister";
+import AdminForgotPassword from "./components/auth/AdminForgotPassword";
 
 export default function App() {
   return (
-   <>
+    <>
       <ScrollToTop />
 
       <Toaster position="top-right" />
@@ -93,13 +96,88 @@ export default function App() {
         />
 
         {/* ================= USER AUTH ================= */}
-        <Route path="/register" element={<AuthLayout><Register /></AuthLayout>} />
-        <Route path="/login" element={<AuthLayout><Login /></AuthLayout>} />
-        <Route path="/verify-otp" element={<AuthLayout><VerifyOTP /></AuthLayout>} />
-        <Route path="/set-username" element={<AuthLayout><SetUsername /></AuthLayout>} />
-        <Route path="/forget-password" element={<AuthLayout><ForgetPassword /></AuthLayout>} />
-        <Route path="/reset-password" element={<AuthLayout><ResetPassword /></AuthLayout>} />
-        <Route path="/otp-verify" element={<AuthLayout><VerifyForgetPasswordOTP /></AuthLayout>} />
+        <Route
+          path="/register"
+          element={
+            <AuthLayout>
+              <Register />
+            </AuthLayout>
+          }
+        />
+        <Route
+          path="/login"
+          element={
+            <AuthLayout>
+              <Login />
+            </AuthLayout>
+          }
+        />
+        <Route
+          path="/verify-otp"
+          element={
+            <AuthLayout>
+              <VerifyOTP />
+            </AuthLayout>
+          }
+        />
+        <Route
+          path="/set-username"
+          element={
+            <AuthLayout>
+              <SetUsername />
+            </AuthLayout>
+          }
+        />
+        <Route
+          path="/forgot-password"
+          element={
+            <AuthLayout>
+              <ForgetPassword />
+            </AuthLayout>
+          }
+        />
+        <Route
+          path="/admin/forgot-password"
+          element={
+            <AuthLayout>
+              <AdminForgotPassword />
+            </AuthLayout>
+          }
+        />
+        <Route
+          path="/admin/verify-otp"
+          element={
+            <AuthLayout>
+              <AdminVerifyForgotPasswordOTP />
+            </AuthLayout>
+          }
+        />
+
+        <Route
+          path="/admin/reset-password"
+          element={
+            <AuthLayout>
+              <AdminResetPassword />
+            </AuthLayout>
+          }
+        />
+
+        <Route
+          path="/reset-password"
+          element={
+            <AuthLayout>
+              <ResetPassword />
+            </AuthLayout>
+          }
+        />
+        <Route
+          path="/otp-verify"
+          element={
+            <AuthLayout>
+              <VerifyForgetPasswordOTP />
+            </AuthLayout>
+          }
+        />
 
         {/* ================= USER ================= */}
         <Route
@@ -124,11 +202,48 @@ export default function App() {
           }
         />
 
-        <Route path="/menu" element={<MainLayout><FilterPage /></MainLayout>} />
-        <Route path="/products" element={<MainLayout><AllProducts /></MainLayout>} />
-        <Route path="/product/:id" element={<MainLayout><ProductDetails /></MainLayout>} />
-        <Route path="/customize" element={<MainLayout><CustomCakeBuilder /></MainLayout>} />
-        <Route path="/cart" element={<MainLayout><Cart /></MainLayout>} />
+        <Route
+          path="/menu"
+          element={
+            <MainLayout>
+              <FilterPage />
+            </MainLayout>
+          }
+        />
+        <Route
+          path="/products"
+          element={
+            <MainLayout>
+              <AllProducts />
+            </MainLayout>
+          }
+        />
+        <Route
+          path="/product/:id"
+          element={
+            <MainLayout>
+              <ProductDetails />
+            </MainLayout>
+          }
+        />
+        <Route
+          path="/customize"
+          element={
+            <ProtectedRoutes>
+              <MainLayout>
+                <CustomCakeBuilder />
+              </MainLayout>
+            </ProtectedRoutes>
+          }
+        />
+        <Route
+          path="/cart"
+          element={
+            <MainLayout>
+              <Cart />
+            </MainLayout>
+          }
+        />
 
         <Route
           path="/order"
@@ -153,7 +268,14 @@ export default function App() {
         />
 
         {/* ================= ADMIN LOGIN ================= */}
-        <Route path="/admin-login" element={<AuthLayout><AdminLogin /></AuthLayout>} />
+        <Route
+          path="/admin-login"
+          element={
+            <AuthLayout>
+              <AdminLogin />
+            </AuthLayout>
+          }
+        />
 
         {/* ================= ADMIN DASHBOARD (PROTECTED) ================= */}
         <Route
@@ -197,7 +319,11 @@ export default function App() {
         {/* ================= SUPER ADMIN REGISTER ================= */}
         <Route
           path="/super-admin/register"
-          element={<AuthLayout><SuperAdminRegister /></AuthLayout>}
+          element={
+            <AuthLayout>
+              <SuperAdminRegister />
+            </AuthLayout>
+          }
         />
 
         {/* ================= 404 ================= */}
@@ -212,6 +338,6 @@ export default function App() {
           }
         />
       </Routes>
-  </>
+    </>
   );
 }

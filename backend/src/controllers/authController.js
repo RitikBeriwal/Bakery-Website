@@ -15,24 +15,24 @@ exports.register = async (req, res) => {
   try {
     const existing = await User.findOne({ $or: [{ email }, { phone }] });
     if (existing)
-      return res.status(400).json({ success: false, message: "Already registered" });
+      return res
+        .status(400)
+        .json({ success: false, message: "Already registered" });
 
     const otp = generateOTP();
 
     if (email) await sendOTPEmail(email, otp);
     if (phone) await sendWhatsAppOTP(`+91${phone}`, otp);
 
-await Otp.create({
-  email,
-  phone,
-  name,
-  password, // ✅ THIS WAS MISSING
-  code: otp,
-  purpose: "register",
-  expiresAt: Date.now() + 5 * 60 * 1000,
-});
-
-
+    await Otp.create({
+      email,
+      phone,
+      name,
+      password, // ✅ THIS WAS MISSING
+      code: otp,
+      purpose: "register",
+      expiresAt: Date.now() + 5 * 60 * 1000,
+    });
 
     res.json({ success: true, message: "OTP sent" });
   } catch (err) {
@@ -59,7 +59,6 @@ exports.sendOtp = async (req, res) => {
 
   res.json({ success: true, message: "OTP sent successfully" });
 };
-
 
 /* ================= VERIFY OTP ================= */
 exports.verifyOtp = async (req, res) => {
@@ -108,11 +107,6 @@ exports.verifyOtp = async (req, res) => {
   }
 };
 
-
-
-
-
-
 /* ================= SET USERNAME ================= */
 exports.setUsername = async (req, res) => {
   try {
@@ -134,13 +128,13 @@ exports.setUsername = async (req, res) => {
     }
 
     // 🔥 ONLY OTP WITH PASSWORD
-  const otpRecord = await Otp.findOne({
-  $or: [{ email }, { phone }],
-  purpose: "register",
-  password: { $exists: true },
-  expiresAt: { $gt: Date.now() },
-}).sort({ createdAt: -1 });
-console.log("OTP RECORD FOUND:", otpRecord);
+    const otpRecord = await Otp.findOne({
+      $or: [{ email }, { phone }],
+      purpose: "register",
+      password: { $exists: true },
+      expiresAt: { $gt: Date.now() },
+    }).sort({ createdAt: -1 });
+    console.log("OTP RECORD FOUND:", otpRecord);
 
     if (!otpRecord || !otpRecord.password) {
       return res.status(400).json({
@@ -149,10 +143,7 @@ console.log("OTP RECORD FOUND:", otpRecord);
       });
     }
 
-    const hashedPassword = await bcrypt.hash(
-      String(otpRecord.password),
-      10
-    );
+    const hashedPassword = await bcrypt.hash(String(otpRecord.password), 10);
 
     const user = await User.create({
       name: otpRecord.name,
@@ -167,11 +158,9 @@ console.log("OTP RECORD FOUND:", otpRecord);
       $or: [{ email }, { phone }],
     });
 
-    const token = jwt.sign(
-      { id: user._id },
-      process.env.JWT_SECRET,
-      { expiresIn: "7d" }
-    );
+    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
+      expiresIn: "7d",
+    });
 
     res.status(201).json({
       success: true,
@@ -188,7 +177,6 @@ console.log("OTP RECORD FOUND:", otpRecord);
   }
 };
 
-
 /* ================= LOGIN ================= */
 exports.login = async (req, res) => {
   const { email, password } = req.body;
@@ -202,9 +190,13 @@ exports.login = async (req, res) => {
 
   const match = await bcrypt.compare(password, user.password);
   if (!match)
-    return res.status(400).json({ success: false, message: "Invalid credentials" });
+    return res
+      .status(400)
+      .json({ success: false, message: "Invalid credentials" });
 
-  const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: "7d" });
+  const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
+    expiresIn: "7d",
+  });
 
   res.json({ success: true, token, user });
 };
@@ -236,7 +228,9 @@ exports.resetPassword = async (req, res) => {
   const { email, newPassword, confirmPassword } = req.body;
 
   if (newPassword !== confirmPassword)
-    return res.status(400).json({ success: false, message: "Passwords mismatch" });
+    return res
+      .status(400)
+      .json({ success: false, message: "Passwords mismatch" });
 
   const otpRecord = await Otp.findOne({ email, purpose: "forgot-password" });
   if (!otpRecord)
@@ -258,5 +252,3 @@ exports.logout = async (req, res) => {
     message: "Logged out successfully",
   });
 };
-
-

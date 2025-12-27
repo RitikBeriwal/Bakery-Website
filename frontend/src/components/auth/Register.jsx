@@ -51,10 +51,7 @@ const Register = () => {
     setLoading(true);
 
     try {
-      const response = await axios.post(
-        "/api/auth/register",
-        formData
-      );
+      const response = await axios.post("/api/auth/register", formData);
 
       toast.success("OTP sent to your email!");
 
