@@ -15,7 +15,9 @@ const AdminResetPassword = () => {
     const storedEmail = localStorage.getItem("adminFpEmail");
 
     if (!storedEmail) {
-      setMessage("❌ No admin email found. Please restart password reset process.");
+      setMessage(
+        "❌ No admin email found. Please restart password reset process."
+      );
       navigate("/admin/forgot-password");
     } else {
       setEmail(storedEmail);
@@ -49,7 +51,6 @@ const AdminResetPassword = () => {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-orange-100 via-yellow-50 to-white px-4">
       <div className="w-full max-w-md bg-white shadow-lg rounded-2xl p-8 border border-gray-200">
-        
         <h2 className="text-3xl font-bold text-center text-gray-800 mb-6">
           Admin Reset Password
         </h2>
@@ -94,8 +95,7 @@ const AdminResetPassword = () => {
           {/* Submit */}
           <button
             type="submit"
-            className="w-full bg-orange-500 text-white py-3 rounded-lg font-semibold text-lg 
-            shadow-md hover:bg-orange-600 transition-all"
+            className="w-full font-semibold py-3 rounded-lg shadow-md transition-all duration-300 disabled:opacity-60 mb-3 bg-[#c85a31] hover:bg-[#b34a22] text-white"
           >
             Reset Password
           </button>

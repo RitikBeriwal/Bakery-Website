@@ -30,8 +30,11 @@
 
 const axios = require("axios");
 const { otpTemplate } = require("./emailTemplates");
+require("dotenv").config();
 
 const sendOTPEmail = async (email, otp) => {
+  console.log("BREVO KEY LENGTH:", process.env.BREVO_API_KEY?.length);
+
   try {
     const response = await axios.post(
       "https://api.brevo.com/v3/smtp/email",
@@ -55,9 +58,10 @@ const sendOTPEmail = async (email, otp) => {
     console.log("📧 Brevo OTP sent:", response.data);
     return true;
   } catch (err) {
-    console.error("❌ Brevo OTP Error:", err?.response?.data || err.message);
-
-    // ❗ IMPORTANT — do NOT crash the backend
+    console.error(
+      "❌ Brevo OTP Error FULL LOG:",
+      err?.response?.data || err.message || err
+    );
     return false;
   }
 };

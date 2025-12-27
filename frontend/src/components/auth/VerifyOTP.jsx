@@ -249,7 +249,8 @@ const VerifyOTP = () => {
         <button
           onClick={handleVerifyOtp}
           disabled={loading || otp.join("").length !== 6}
-          className="w-full bg-[#dfa26d] text-white font-semibold py-3 rounded-lg shadow-md hover:bg-[#e6b07c] transition-all duration-300 disabled:opacity-60 mb-3 flex items-center justify-center gap-2"
+          className="w-full font-semibold py-3 rounded-lg shadow-md transition-all duration-300 disabled:opacity-60 mb-3 bg-[#c85a31] hover:bg-[#b34a22] text-white"
+
         >
           {loading ? (
             <>

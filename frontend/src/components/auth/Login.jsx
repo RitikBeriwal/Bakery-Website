@@ -223,11 +223,7 @@ const Login = () => {
       <button
         type="submit"
         disabled={loading || animationStage !== "idle"}
-        className={`w-full font-semibold py-3 rounded-lg shadow-md transition-all duration-300 disabled:opacity-60 mb-3 ${
-          isAdminLogin
-            ? "bg-[#c85a31] hover:bg-[#b34a22] text-white"
-            : "bg-[#dfa26a] hover:bg-[#e6b07c] text-white"
-        }`}
+        className="w-full font-semibold py-3 rounded-lg shadow-md transition-all duration-300 disabled:opacity-60 mb-3 bg-[#c85a31] hover:bg-[#b34a22] text-white"
       >
         {loading ? (
           <span className="flex items-center justify-center">
@@ -326,7 +322,7 @@ const Login = () => {
             disabled={animationStage !== "idle"}
             className={`flex-1 py-4 font-semibold transition-all duration-300 disabled:opacity-50 ${
               !isAdminLogin
-                ? "bg-[#dfa26d] text-white shadow-inner"
+                ? "bg-[#c85a31] hover:bg-[#b34a22] text-white"
                 : "bg-gray-100 text-gray-600 hover:bg-gray-50"
             }`}
           >
@@ -338,7 +334,7 @@ const Login = () => {
             disabled={animationStage !== "idle"}
             className={`flex-1 py-4 font-semibold transition-all duration-300 disabled:opacity-50 ${
               isAdminLogin
-                ? "bg-[#c85a32] text-white shadow-inner"
+                ? "bg-[#c85a31] hover:bg-[#b34a22] text-white"
                 : "bg-gray-100 text-gray-600 hover:bg-gray-50"
             }`}
           >

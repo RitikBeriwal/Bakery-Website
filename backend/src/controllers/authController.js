@@ -5,7 +5,7 @@ const User = require("../models/User");
 const Otp = require("../models/Otp");
 
 const { sendOTPEmail } = require("../utils/sendOTP");
-const { sendWhatsAppOTP } = require("../utils/sendWhatsappOTP");
+// const { sendWhatsAppOTP } = require("../utils/sendWhatsappOTP");
 const generateOTP = require("../utils/generateOTP");
 
 /* ================= REGISTER ================= */
@@ -21,14 +21,17 @@ exports.register = async (req, res) => {
 
     const otp = generateOTP();
 
-    if (email) await sendOTPEmail(email, otp);
-    if (phone) await sendWhatsAppOTP(`+91${phone}`, otp);
+    let emailSent = false;
+
+    if (email) emailSent = await sendOTPEmail(email, otp);
+
+    console.log("OTP STATUS:", { emailSent });
 
     await Otp.create({
       email,
       phone,
       name,
-      password, // ✅ THIS WAS MISSING
+      password,
       code: otp,
       purpose: "register",
       expiresAt: Date.now() + 5 * 60 * 1000,
@@ -36,6 +39,7 @@ exports.register = async (req, res) => {
 
     res.json({ success: true, message: "OTP sent" });
   } catch (err) {
+    console.error("REGISTER ERROR:", err);
     res.status(500).json({ success: false, error: err.message });
   }
 };
@@ -46,14 +50,17 @@ exports.sendOtp = async (req, res) => {
 
   const otp = generateOTP();
 
-  if (email) await sendOTPEmail(email, otp);
-  if (phone) await sendWhatsAppOTP(`+91${phone}`, otp);
+  let emailSent = false;
+
+  if (email) emailSent = await sendOTPEmail(email, otp);
+
+  console.log("OTP STATUS:", { emailSent });
 
   await Otp.create({
     email,
     phone,
     code: otp,
-    purpose, // ✅ ADD
+    purpose,
     expiresAt: Date.now() + 5 * 60 * 1000,
   });
 
@@ -63,7 +70,7 @@ exports.sendOtp = async (req, res) => {
 /* ================= VERIFY OTP ================= */
 exports.verifyOtp = async (req, res) => {
   try {
-    const { email, phone, otp, purpose } = req.body;
+    const { email, otp, purpose } = req.body;
 
     if (!otp) {
       return res.status(400).json({
@@ -79,7 +86,7 @@ exports.verifyOtp = async (req, res) => {
 
     // 🔥 MOST IMPORTANT FIX
     if (email) query.email = email;
-    if (phone) query.phone = phone;
+    // if (phone) query.phone = phone;
 
     // purpose optional rakho
     if (purpose) query.purpose = purpose;
@@ -218,7 +225,15 @@ exports.forgotPassword = async (req, res) => {
     expiresAt: Date.now() + 5 * 60 * 1000,
   });
 
-  await sendOTPEmail(email, otp);
+  const sent = await sendOTPEmail(email, otp);
+
+  if (!sent) {
+    return res.status(200).json({
+      success: true,
+      message:
+        "We generated your OTP, but email delivery is temporarily unavailable. Please try again in a few minutes.",
+    });
+  }
 
   res.json({ success: true, message: "OTP sent" });
 };
